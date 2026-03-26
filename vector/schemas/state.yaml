@@ -1,0 +1,167 @@
+phase: intake
+milestone: null
+stage: null
+product:
+  name: null
+  summary: null
+  price: null
+  live_status: unknown
+  category: null
+
+icp:
+  hypothesis: null
+  confirmed: false
+  who: null
+  problem: null
+  trigger_moment: null
+  desired_outcome: null
+  watering_holes: []
+  wtp_signal: null
+  drift_status: unknown
+  evidence: []
+  # [v2.0.0] Evidence tags per claim
+  evidence_tags:
+    who: speculative
+    problem: speculative
+    trigger_moment: speculative
+    wtp_signal: speculative
+    forces: speculative
+  confidence: unknown
+  top_unknown: null
+  next_experiment: null
+  # [v2.0.0] 4 Forces of Progress
+  forces:
+    push: null       # Pain/frustration đẩy họ rời status quo
+    pull: null       # Promise/outcome kéo họ đến solution
+    anxiety: null    # Fear of switching, wrong decision, ROI unclear
+    habit: null      # "Tạm ổn rồi", workaround embedded, no urgency
+
+# [v2.0.0] Full market section with category stance and 4-type competitor map
+market:
+  stage_confirmed: null
+  market_category: null
+  category_stance: null          # entering / reframing / creating
+  competitor_map:
+    direct: []
+    substitutes: []
+    workflow_competitors: []
+    attention_competitors: []
+  gold_zone_channels: []
+  red_ocean: []
+  white_space_notes: null
+  why_now_pressure: null
+  next_research_question: null
+  last_updated: null
+
+# [v2.0.0] Founder Edge Audit per channel
+founder_edge_audit: []
+# format:
+# - channel: [name]
+#   network_presence: null       # yes/no
+#   track_record: null           # yes/no
+#   credibility_recognizable: null # yes/no
+#   speed_advantage: null        # yes/no
+#   warm_door_opener: null       # yes/no
+#   score: null                  # 0-5
+
+distribution:
+  channel_selected: null
+  channel_score: null            # stage-weighted normalized score (0-100)
+  channel_score_raw: null        # {icp_match, builder_advantage, speed_to_signal, cost_to_test, scalability}
+  venue_selected: null
+  primary_angle: null
+  growth_multiplier: null
+  growth_multiplier_type: null   # A/B/C/D
+  unlock_condition: null
+  alternatives: []
+
+research_memo: null
+
+signals:
+  green: []
+  yellow: []
+  red: []
+
+# [v2.0.0] Objection map
+objection_map:
+  primary_objection: null
+  objection_type: null           # anxiety / habit / both
+  copy_job: null
+  placement: null
+  secondary_objection: null
+
+# [v2.0.0] Recovery routing log
+recovery_log: []
+# format:
+# - milestone: [M0-M5]
+#   drift_type: [wrong_icp/wrong_channel/wrong_angle/wrong_venue/weak_trust/too_much_scope/too_much_noise]
+#   return_phase: [phase name]
+#   correction_applied: null
+#   date: null
+
+confidence:
+  current_phase: null
+  overall: unknown
+
+risk:
+  riskiest_assumption: null
+  top_failure_mode: null
+  drift_status: unknown
+
+# [v2.0.0] Gate registry
+gates:
+  intake_cleared: false
+  icp_cleared: false
+  market_cleared: false
+  channel_cleared: false
+  thesis_cleared: false
+  venue_cleared: false
+
+logs:
+  trauma: []
+  decisions: []
+  questions_open: []
+
+metadata:
+  language: en
+  notes_language: vi
+  version: v2.0.0
+
+routing:
+  persona: unknown
+  mode: quick_start
+  platform: unknown
+  intent: unknown
+  last_router_reason: null
+
+artifact_registry:
+  intake_memo: null
+  icp_card: null
+  market_map: null
+  channel_scorecard: null
+  thesis_card: null
+  venue_card: null
+  venue_scorecard: null
+  signal_ledger: null
+  research_memo: null
+  copy_pack: null
+  decision_memo: null
+  strategy_map: null
+  # [v2.0.0] New artifacts
+  founder_edge_audit_result: null
+  objection_map: null
+
+experiment_ledger:
+  active: []
+  archived: []
+
+platform:
+  name: null
+  install_status: unknown
+  load_order_verified: false
+
+session:
+  schema_version: v2.0.0
+  kb_synced: false
+  last_sync: null
+  confidence_delta: null

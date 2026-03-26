@@ -1,0 +1,51 @@
+phase_contract:
+  executable_source_of_truth: vector/mcp_server/workflow_contract.ts
+  id: string
+  owner: orchestrator | icp | market | channel | thesis | venue | signal
+  purpose: string
+  required_inputs: [string]
+  optional_inputs: [string]
+  required_outputs: [string]
+  exit_criteria: [string]
+  fallback_actions: [string]
+  evidence_threshold: string
+  confidence_rule: string
+  next_phase: string
+
+artifact_requirements:
+  each_phase_must_emit:
+    - artifact_name
+    - evidence_used
+    - decision
+    - next_action
+    - confidence_update
+router_rules:
+  intake:
+    default_mode: quick_start
+    alternative_modes: [audit_mode, research_mode]
+  icp:
+    default_mode: quick_start
+    alternative_modes: [full_mode, recovery_mode]
+  market:
+    default_mode: research_mode
+  channel:
+    default_mode: full_mode
+  thesis:
+    default_mode: full_mode
+  venue:
+    default_mode: full_mode
+  signal:
+    default_mode: recovery_mode
+
+v1_5_enhancements:
+  phase_artifact_extensions:
+    - evidence_provenance
+    - confidence_update
+    - next_check_date
+    - reversibility_note
+    - kill_switch
+  router_priority:
+    - preserve_evidence
+    - lock thesis before copy
+    - keep venue aligned with channel
+    - keep signal before scale

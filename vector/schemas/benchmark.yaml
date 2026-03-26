@@ -1,0 +1,113 @@
+benchmarks:
+  # [v2.0.0] Concrete numbers aligned with signal skill
+  cold_email:
+    stage_0_to_1:
+      minimum_attempts: 20
+      healthy_response_rate: "3-6%"          # [v2.0.0] updated to current reality
+      strong_performer: "10%+"
+      caution_zone: "1-2%"
+      failure_zone: "0% after 30+ genuine attempts"
+      interpretation: "5% reply rate không phải thất bại — gửi 20, nhận 1 = đang trong benchmark"
+  linkedin_outreach:
+    stage_0_to_1:
+      minimum_attempts: 20
+      healthy_response_rate: "10-25%"        # [v2.0.0] specific range
+      strong_performer: "30%+"
+      caution_zone: "low acceptance or low reply quality"
+      failure_zone: "no meaningful conversations after repeated attempts"
+      interpretation: "Reply rate < 2% = vấn đề targeting, không phải volume"
+  cold_call:
+    stage_0_to_1:
+      minimum_attempts: 20
+      healthy_response_rate: "2-5% connect rate"  # [v2.0.0]
+      strong_performer: "8%+"
+      caution_zone: "connects without conversations"
+      failure_zone: "no connects after 20+ attempts"
+  twitter_community:
+    stage_0_to_1:
+      minimum_attempts: 10
+      healthy_signal: "unprompted replies, DMs, shares, saves"
+      caution_zone: "likes without conversation"
+      failure_zone: "no ICP presence"
+  product_hunt:
+    stage_0_to_1:
+      minimum_attempts: 1
+      healthy_signal: "qualified signups and replies"
+      caution_zone: "traffic without activation"
+      failure_zone: "visits without intent"
+
+community_outreach:
+  stage_0_to_1:
+    minimum_attempts: 10
+    healthy_signal: "real replies, follow-up questions, profile clicks"
+    caution_zone: "likes or emoji without conversation"
+    failure_zone: "no ICP presence after repeated attempts"
+owned_audience:
+  stage_1_to_10:
+    minimum_attempts: 3
+    healthy_signal: "replies, conversions, forwards"
+    caution_zone: "open rates without replies"
+    failure_zone: "audience is present but not activating"
+partner_channel:
+  stage_1_to_10:
+    minimum_attempts: 5
+    healthy_signal: "warm intros, co-marketing interest, direct asks"
+    caution_zone: "polite interest without action"
+    failure_zone: "no trust transfer"
+marketplace:
+  stage_0_to_1:
+    minimum_attempts: 1
+    healthy_signal: "qualified discovery and purchase intent"
+    caution_zone: "traffic without activation"
+    failure_zone: "browse-only visits"
+
+# [v2.0.0] Intent signal triggers — warm outreach gets 3-5x reply rate vs cold
+intent_signals:
+  high_value:
+    - "recent_hire_relevant_role"     # dấu hiệu initiative mới hoặc pain mới
+    - "new_funding_round"             # budget available, urgency to show results
+    - "job_posting_signals_pain"      # actively trying to solve the problem
+    - "competitor_change"             # provider raised prices, acquired, or changed features
+  medium_value:
+    - "public_statement_matches_pain" # LinkedIn post, conference talk
+    - "regulatory_market_shift"       # creates urgency
+    - "search_activity"               # actively searching for solution
+  interpretation: >
+    Với warm outreach (có intent signal), reply rate cao hơn cold 3-5x.
+    Ưu tiên outreach khi thấy intent signal trước khi outreach cold.
+
+# [v2.0.0] Multi-touch cadence guidelines
+multi_touch_cadence:
+  general_rules:
+    - "80% of deals require 5+ touches — không dừng vì im lặng sau 1-2 attempts"
+    - "44% of reps quit after 1 touch — đây là competitive advantage"
+    - "Each touch cần lý do riêng — không gửi 'just following up'"
+  recommended_sequence:
+    day_1: "First contact (primary channel)"
+    day_3: "Follow-up (same channel, new angle)"
+    day_5: "Second channel touch (soft mention)"
+    day_8: "Value add touch (no ask)"
+    day_12: "Final ask (close the loop)"
+  channel_combination: >
+    Single-channel outreach dễ fail ở 0→1. Layer hai channels nếu có thể.
+    Mỗi touch reference touch trước — không generic.
+
+v1_5_enhancements:
+  content_channel:
+    stage_0_to_1:
+      minimum_attempts: 5
+      healthy_signal: "saves, replies, forwards, or DMs from ICP-like people"
+      caution_zone: "engagement without conversation"
+      failure_zone: "no ICP presence after repeated posting"
+  partnership_channel:
+    stage_1_to_10:
+      minimum_attempts: 5
+      healthy_signal: "warm intros, co-marketing interest, direct asks"
+      caution_zone: "polite interest without a next step"
+      failure_zone: "no trust transfer"
+  landing_page:
+    stage_0_to_1:
+      minimum_attempts: 1
+      healthy_signal: "qualified signups or replies"
+      caution_zone: "traffic without activation"
+      failure_zone: "visits without intent"

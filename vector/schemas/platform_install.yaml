@@ -1,0 +1,60 @@
+platform_install:
+  claude:
+    load_order:
+      - state
+      - orchestrator
+      - prompt_pack
+      - kb
+      - examples
+  cursor:
+    load_order:
+      - rules
+      - orchestrator
+      - skills
+      - kb
+  windsurf:
+    load_order:
+      - skills
+      - orchestrator
+      - kb
+  codex:
+    load_order:
+      - repo_instructions
+      - tasks
+      - kb
+  manus:
+    load_order:
+      - skill_pack
+      - orchestrator
+      - kb
+  lovable:
+    load_order:
+      - knowledge
+      - compact_instructions
+      - kb
+  openclaw:
+    load_order:
+      - config
+      - skills
+      - kb
+
+
+verification:
+  - load_order_verified
+  - kb_location_verified
+  - orchestrator_loaded
+  - first_artifact_emitted
+  - kb_synced_after_turn
+fallback:
+  mode: quick_start
+  reason: if platform install is incomplete, start with the shortest reliable path
+
+v1_5_enhancements:
+  adapter_principles:
+    - preserve_canonical_schema_first
+    - keep_skill_loading_order_explicit
+    - keep_kb_sync_visible
+    - prefer_reviewable_outputs
+  skill_registry_note:
+    - if the platform supports reusable skill folders, group related skills together
+    - if the platform supports only instructions, compress the same routing logic into a single stable instruction pack

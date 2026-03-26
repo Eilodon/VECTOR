@@ -1,0 +1,68 @@
+# ============================================================
+# VECTOR SUITE — .gitignore
+# ============================================================
+
+# ── Node / pnpm ──────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+
+# ── Build / Compiled output ───────────────────────────────────
+dist/
+build/
+out/
+*.js.map
+*.d.ts
+# Keep top-level .mjs scripts (scripts/*.mjs are source, not build)
+# Cần publish package này bằng git nên keep compiled dist output
+!vector/mcp_server/dist/
+
+# ── Environment & Secrets ─────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.secret
+secrets/
+
+# ── Logs ─────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── Test / Coverage ───────────────────────────────────────────
+coverage/
+.nyc_output/
+*.lcov
+
+# ── TypeScript cache ──────────────────────────────────────────
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# ── Runtime / Temp ────────────────────────────────────────────
+.cache/
+tmp/
+temp/
+*.tmp
+*.swp
+
+# ── OS & Editor noise ─────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ── VECTOR-specific runtime state ────────────────────────────
+# Session snapshots / rollback archives generated at runtime
+vector/kb/*.snapshot.yaml
+vector/kb/*.bak
+*.vector_session.json

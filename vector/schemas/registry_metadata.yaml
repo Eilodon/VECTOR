@@ -1,0 +1,49 @@
+registry_metadata:
+  schema: vector_registry_metadata/v1
+  required_fields:
+    - package_name
+    - package_version
+    - runtime_version
+    - transports
+    - auth
+    - capability_mode
+    - maturity
+    - install_surfaces
+    - compatibility
+    - self_test_commands
+  transports:
+    local: stdio
+    remote: streamable_http
+  auth:
+    scheme: bearer
+    key_prefix: vsk_
+    supported_credentials:
+      - vector_license_key
+      - oauth_access_token
+    session_policy:
+      registry_store: VECTOR_KB_STORE
+      anomaly_policy: review-first
+    remote_headers:
+      - Authorization
+      - x-vector-project-id
+      - x-vector-session-owner
+  capability_mode:
+    restricted_mode_env: VECTOR_TOOLSETS
+    safe_mode_env: VECTOR_SAFE_MODE
+    toolsets:
+      - core
+      - research
+      - strategy
+      - copy
+      - admin
+  compatibility_status:
+    - documented
+    - verified-local
+    - verified-remote
+    - deprecated
+  maturity:
+    required_fields:
+      - product_stage
+      - implemented_now
+      - roadmap_only
+      - verification_boundary

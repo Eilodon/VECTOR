@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "vector": {
+      "command": "__VECTOR_SERVER_COMMAND__",
+      "args": __VECTOR_SERVER_ARGS_JSON__,
+      "env": {
+        "VECTOR_LICENSE_KEY": "__VECTOR_LICENSE_KEY__",
+        "VECTOR_PROJECT_ID": "__VECTOR_PROJECT_ID__",
+        "VECTOR_TOOLSETS": "__VECTOR_TOOLSETS__",
+        "VECTOR_SAFE_MODE": "__VECTOR_SAFE_MODE__"
+      },
+      "alwaysAllow": [
+        "vector_state_snapshot",
+        "vector_intake",
+        "vector_list_toolsets",
+        "vector_list_toolset_tools"
+      ],
+      "disabled": false
+    }
+  }
+}

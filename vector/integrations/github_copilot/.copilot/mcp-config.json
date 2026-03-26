@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "vector": {
+      "type": "local",
+      "command": "node",
+      "args": ["vector/mcp_server/dist/index.js"],
+      "env": {
+        "VECTOR_LICENSE_KEY": "vsk_replace_me",
+        "VECTOR_PROJECT_ID": "copilot_local",
+        "VECTOR_TOOLSETS": "core,research,strategy,copy",
+        "VECTOR_SAFE_MODE": "true"
+      },
+      "tools": ["*"]
+    }
+  }
+}

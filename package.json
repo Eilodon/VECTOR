@@ -1,0 +1,21 @@
+{
+	"private": true,
+	"packageManager": "pnpm@10.32.1",
+	"scripts": {
+		"lint": "node scripts/manifest.mjs check",
+		"integrations:check": "node scripts/verify_integrations.mjs",
+		"host:install": "node scripts/install_vector.mjs",
+		"selftest": "node scripts/selftest.mjs",
+		"registry:check": "node scripts/registry_metadata.mjs check",
+		"registry:write": "node scripts/registry_metadata.mjs write",
+		"typecheck": "pnpm --dir vector/mcp_server run typecheck && pnpm --dir vector/cloud_worker run typecheck",
+		"test": "node --test tests/*.mjs",
+		"manifest:check": "node scripts/manifest.mjs check",
+		"manifest:write": "node scripts/manifest.mjs write",
+		"release-check": "pnpm run lint && pnpm run typecheck && pnpm --dir vector/mcp_server run build && pnpm run registry:check && pnpm run integrations:check && pnpm run selftest -- --host cursor && node --test tests/*.mjs",
+		"verify": "pnpm run release-check"
+	},
+	"devDependencies": {
+		"typescript": "^6.0.2"
+	}
+}

@@ -1,0 +1,33 @@
+personas:
+  prelaunch_builder:
+    default_mode: quick_start
+    focus: discovery_and_validation
+  active_founder:
+    default_mode: full_mode
+    focus: channel_selection_and_signal
+  scaling_team:
+    default_mode: full_mode
+    focus: systemization_and_multiplier
+  audit_user:
+    default_mode: audit_mode
+    focus: improve_vector_itself
+routing_rules:
+  - when: no_live_product
+    route_to: quick_start
+  - when: live_product_no_signal
+    route_to: research_mode
+  - when: signal_exists
+    route_to: full_mode
+  - when: repeated_failure
+    route_to: recovery_mode
+
+
+escalation_rules:
+  - when: ambiguous_intent
+    route_to: quick_start
+  - when: market_uncertainty_high
+    route_to: research_mode
+  - when: repeated_channel_failure
+    route_to: recovery_mode
+  - when: locked_thesis_and_copy_needed
+    route_to: copy_mode

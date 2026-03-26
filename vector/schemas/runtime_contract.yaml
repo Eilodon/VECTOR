@@ -1,0 +1,92 @@
+runtime_contract:
+  version: v2.0.0
+  source_of_truth:
+    - vector/mcp_server/workflow_contract.ts
+    - vector/mcp_server/capability_contract.ts
+    - vector/schemas/state.yaml
+    - vector/schemas/decision_policy.yaml
+    - vector/schemas/phase_schema.yaml
+    - vector/schemas/artifact_contract.yaml
+    - vector/schemas/persona_routing.yaml
+    - vector/schemas/platform_install.yaml
+    - vector/schemas/session_contract.yaml
+    - vector/docs/SCHEMA_REFERENCE.md
+  runtime_sequence:
+    - initialize_core_runtime
+    - detect_persona
+    - detect_platform
+    - load_kb
+    - reconcile_session_and_state
+    - select_mode
+    - select_phase
+    - produce_artifact
+    - sync_kb
+  transports:
+    local: stdio
+    remote: streamable_http
+  tool_contract:
+    request_id: optional_but_supported_for_all_tools
+    retry_semantics: same_request_id_returns_cached_response
+    state_commit: serialized_queue
+    capability_contract:
+      toolsets:
+        - core
+        - research
+        - strategy
+        - copy
+        - admin
+      runtime_discovery:
+        - vector_list_toolsets
+        - vector_list_toolset_tools
+      restricted_mode_env: VECTOR_TOOLSETS
+      safe_mode_env: VECTOR_SAFE_MODE
+      safe_mode_blocks:
+        - vector_update_state
+        - vector_undo
+    research_tools:
+      - vector_list_research_providers
+      - vector_research_search
+      - vector_source_capture
+      - vector_competitor_map
+      - vector_channel_evidence
+      - vector_research_memo
+    research_provider_contract:
+      interfaces:
+        - search
+        - crawl
+        - extract
+        - browser_session
+        - deep_research_job
+      normalization_seam: vector_source_capture
+      provider_backed_entrypoint: vector_research_search
+    graph_memory_contract:
+      sidecar_file: vector_graph_memory.json
+      sync_tool: vector_graph_sync
+      query_tool: vector_graph_query
+      authoritative_snapshot_file: vector_state.json
+      graph_is_advisory: true
+      auto_sync_on_mutation: true
+    freshness_policy: source_type_sets_default_stale_after_days
+    scoring_policy: evidence_first_when_fresh_observations_exist
+  sync_rules:
+    - do_not_overwrite_evidence_without_archive
+    - preserve_previous_decisions
+    - version_every_major_update
+    - reconcile_conflicts_against_canonical_schema
+  failure_paths:
+    - missing_kb_snapshot -> use_quick_start_then_sync
+    - conflicting_contracts -> stop_and_reconcile
+    - missing_platform_support -> load_platform_install_contract
+    - repeated_failure -> enter_recovery_mode
+  artifact_sequence:
+    - intake_memo
+    - icp_card
+    - market_map
+    - founder_edge_audit_result
+    - channel_scorecard
+    - thesis_card
+    - venue_card
+    - signal_ledger
+    - research_memo
+    - copy_pack
+    - copy_review

@@ -1,0 +1,374 @@
+{
+  "schema": "vector_registry_metadata/v1",
+  "package_name": "VECTOR Suite",
+  "package_version": "v2.0.0",
+  "runtime_version": "v2.0.0",
+  "target_persona": "builder-first automation for solo founders and indie hackers",
+  "transports": {
+    "local": "stdio",
+    "remote": "streamable_http"
+  },
+  "auth": {
+    "scheme": "bearer",
+    "key_prefix": "vsk_",
+    "supported_credentials": [
+      "vector_license_key",
+      "oauth_access_token"
+    ],
+    "resource_server": {
+      "provider": "auth0",
+      "env": {
+        "issuer": "VECTOR_AUTH_ISSUER",
+        "audience": "VECTOR_AUTH_AUDIENCE",
+        "jwks_json_override": "VECTOR_AUTH_JWKS_JSON",
+        "required_scope": "VECTOR_AUTH_REQUIRED_SCOPE",
+        "allow_license_fallback": "VECTOR_ALLOW_LICENSE_FALLBACK"
+      },
+      "default_required_scope": "vector:cloud"
+    },
+    "session_policy": {
+      "registry_store": "VECTOR_KB_STORE",
+      "env": {
+        "idle_ttl_ms": "VECTOR_AUTH_SESSION_IDLE_TTL_MS",
+        "max_sessions_default": "VECTOR_AUTH_MAX_SESSIONS_DEFAULT",
+        "max_sessions_license": "VECTOR_AUTH_MAX_SESSIONS_LICENSE",
+        "max_sessions_basic": "VECTOR_AUTH_MAX_SESSIONS_BASIC",
+        "max_sessions_pro": "VECTOR_AUTH_MAX_SESSIONS_PRO",
+        "max_sessions_custom": "VECTOR_AUTH_MAX_SESSIONS_CUSTOM",
+        "max_sessions_enterprise": "VECTOR_AUTH_MAX_SESSIONS_ENTERPRISE",
+        "anomaly_log_limit": "VECTOR_AUTH_ANOMALY_LOG_LIMIT"
+      },
+      "default_idle_ttl_ms": 14400000,
+      "defaults": {
+        "license": 2,
+        "basic": 2,
+        "pro": 5,
+        "custom": 10,
+        "enterprise": 20
+      },
+      "anomaly_policy": "review-first"
+    },
+    "remote_headers": [
+      "Authorization",
+      "x-vector-project-id",
+      "x-vector-session-owner"
+    ]
+  },
+  "capability_mode": {
+    "restricted_mode_env": "VECTOR_TOOLSETS",
+    "safe_mode_env": "VECTOR_SAFE_MODE",
+    "default_toolsets": [
+      "core",
+      "research",
+      "strategy",
+      "copy",
+      "admin"
+    ],
+    "optional_toolsets": [
+      "core",
+      "research",
+      "strategy",
+      "copy",
+      "admin"
+    ],
+    "toolsets": [
+      {
+        "name": "core",
+        "tools": [
+          "vector_intake",
+          "vector_icp_jtbd",
+          "vector_market_terrain",
+          "vector_founder_edge_audit",
+          "vector_channel_score",
+          "vector_thesis",
+          "vector_venue",
+          "vector_signal_review",
+          "vector_state_snapshot",
+          "vector_list_toolsets",
+          "vector_list_toolset_tools"
+        ],
+        "mutating_tools": [
+          "vector_intake",
+          "vector_icp_jtbd",
+          "vector_market_terrain",
+          "vector_founder_edge_audit",
+          "vector_channel_score",
+          "vector_thesis",
+          "vector_venue",
+          "vector_signal_review"
+        ],
+        "read_only_tools": [
+          "vector_state_snapshot",
+          "vector_list_toolsets",
+          "vector_list_toolset_tools"
+        ],
+        "safe_mode_blocked_tools": []
+      },
+      {
+        "name": "research",
+        "tools": [
+          "vector_list_research_providers",
+          "vector_research_search",
+          "vector_source_capture",
+          "vector_competitor_map",
+          "vector_channel_evidence",
+          "vector_research_memo"
+        ],
+        "mutating_tools": [
+          "vector_research_search",
+          "vector_source_capture",
+          "vector_competitor_map",
+          "vector_channel_evidence",
+          "vector_research_memo"
+        ],
+        "read_only_tools": [
+          "vector_list_research_providers"
+        ],
+        "safe_mode_blocked_tools": []
+      },
+      {
+        "name": "strategy",
+        "tools": [
+          "vector_venue_score",
+          "vector_route_context",
+          "vector_strategy_map",
+          "vector_graph_sync",
+          "vector_graph_query",
+          "vector_sync_kb"
+        ],
+        "mutating_tools": [
+          "vector_venue_score",
+          "vector_route_context",
+          "vector_strategy_map",
+          "vector_graph_sync",
+          "vector_sync_kb"
+        ],
+        "read_only_tools": [
+          "vector_graph_query"
+        ],
+        "safe_mode_blocked_tools": []
+      },
+      {
+        "name": "copy",
+        "tools": [
+          "vector_sales_copy",
+          "vector_copy_review",
+          "vector_render_media"
+        ],
+        "mutating_tools": [
+          "vector_sales_copy",
+          "vector_copy_review"
+        ],
+        "read_only_tools": [
+          "vector_render_media"
+        ],
+        "safe_mode_blocked_tools": []
+      },
+      {
+        "name": "admin",
+        "tools": [
+          "vector_update_state",
+          "vector_undo"
+        ],
+        "mutating_tools": [
+          "vector_update_state",
+          "vector_undo"
+        ],
+        "read_only_tools": [],
+        "safe_mode_blocked_tools": [
+          "vector_update_state",
+          "vector_undo"
+        ]
+      }
+    ]
+  },
+  "maturity": {
+    "product_stage": "maturing_runtime",
+    "implemented_now": [
+      "local stdio runtime",
+      "remote streamable-http runtime",
+      "bearer license validation with active license check",
+      "optional Auth0 JWT validation for remote runtime",
+      "principal-scoped session registry with concurrent-session caps",
+      "review-first anomaly event logging for device and IP drift",
+      "ownership headers for remote sessions",
+      "capability-scoped toolsets",
+      "provider-backed research with fixture and env-gated production connectors",
+      "advisory graph memory with automatic sync on state mutation",
+      "host installer and host-facing self-test"
+    ],
+    "roadmap_only": [
+      "token rotation and anomaly detection suite",
+      "community KB export and anonymized aggregate insights",
+      "real host OAuth/PKCE rollout evidence"
+    ],
+    "verification_boundary": "Generated fixtures and repo self-tests do not promote a host beyond documented without a real host run."
+  },
+  "install_surfaces": [
+    {
+      "host": "cursor",
+      "label": "Cursor",
+      "runtime_modes": [
+        "local"
+      ],
+      "install_surface": "local MCP / stdio or local subprocess",
+      "default_project_id": "cursor_local",
+      "default_toolsets": [
+        "core",
+        "research",
+        "strategy",
+        "copy"
+      ],
+      "default_safe_mode": true,
+      "generated_files": [
+        ".cursor/mcp.json"
+      ]
+    },
+    {
+      "host": "cline",
+      "label": "Cline",
+      "runtime_modes": [
+        "local"
+      ],
+      "install_surface": "local MCP server",
+      "default_project_id": "cline_local",
+      "default_toolsets": [
+        "core",
+        "research",
+        "strategy",
+        "copy"
+      ],
+      "default_safe_mode": true,
+      "generated_files": [
+        "cline_mcp_settings.json"
+      ]
+    },
+    {
+      "host": "windsurf",
+      "label": "Windsurf",
+      "runtime_modes": [
+        "local"
+      ],
+      "install_surface": "local MCP server",
+      "default_project_id": "windsurf_local",
+      "default_toolsets": [
+        "core",
+        "research",
+        "strategy",
+        "copy"
+      ],
+      "default_safe_mode": true,
+      "generated_files": [
+        "mcp_config.json"
+      ]
+    },
+    {
+      "host": "github_copilot",
+      "label": "GitHub Copilot",
+      "runtime_modes": [
+        "local"
+      ],
+      "install_surface": "repo-local MCP tool provider",
+      "default_project_id": "copilot_local",
+      "default_toolsets": [
+        "core",
+        "research",
+        "strategy",
+        "copy"
+      ],
+      "default_safe_mode": true,
+      "generated_files": [
+        ".copilot/mcp-config.json",
+        ".github/agents/vector_gtm.agent.md"
+      ]
+    }
+  ],
+  "compatibility": [
+    {
+      "host": "Claude",
+      "status": "documented",
+      "integration_shape": "project knowledge / repo instructions",
+      "notes": "Strong context surface, but this repo does not ship a reproducible MCP install path for Claude Projects."
+    },
+    {
+      "host": "Codex",
+      "status": "documented",
+      "integration_shape": "repo context + reviewable tasks",
+      "notes": "Good fit for reviewable work; keep documented until a reproducible host setup is checked in."
+    },
+    {
+      "host": "Cursor",
+      "status": "documented",
+      "integration_shape": "local MCP + rules + skills",
+      "notes": "Generated fixture plus `pnpm run selftest -- --host cursor` exist in-repo; promotion still requires a real Cursor run."
+    },
+    {
+      "host": "Lovable",
+      "status": "documented",
+      "integration_shape": "workspace knowledge",
+      "notes": "Useful for product context, not a first-class MCP host in this repo."
+    },
+    {
+      "host": "Manus",
+      "status": "documented",
+      "integration_shape": "remote MCP tool provider",
+      "notes": "Remote-ready in theory after `P1`, but still not verified without an in-repo host smoke test."
+    },
+    {
+      "host": "OpenClaw",
+      "status": "documented",
+      "integration_shape": "file-system skills",
+      "notes": "Requires security review plus precedence testing before any promotion."
+    },
+    {
+      "host": "Windsurf",
+      "status": "documented",
+      "integration_shape": "local MCP server + skills",
+      "notes": "Generated fixture plus `pnpm run selftest -- --host windsurf` exist in-repo; promotion still requires a real Windsurf run."
+    },
+    {
+      "host": "GitHub Copilot",
+      "status": "documented",
+      "integration_shape": "coding agent + MCP",
+      "notes": "Generated fixture plus `pnpm run selftest -- --host github_copilot` exist in-repo; promotion still requires a real host run."
+    },
+    {
+      "host": "Cline",
+      "status": "documented",
+      "integration_shape": "local MCP + CLI / editor agent",
+      "notes": "Generated fixture plus `pnpm run selftest -- --host cline` exist in-repo; promotion still requires a real Cline run."
+    },
+    {
+      "host": "OpenHands",
+      "status": "documented",
+      "integration_shape": "remote MCP + headless agent",
+      "notes": "Candidate for `verified-remote` once remote smoke proof is captured."
+    },
+    {
+      "host": "Replit",
+      "status": "documented",
+      "integration_shape": "hosted workspace + remote MCP",
+      "notes": "Candidate for `verified-remote` once hosted service flow is reproduced in-repo."
+    },
+    {
+      "host": "Antigravity",
+      "status": "documented",
+      "integration_shape": "agent-first dev environment",
+      "notes": "Keep documented until the public integration path is stable and smoke-tested."
+    },
+    {
+      "host": "Legacy SSE remote path",
+      "status": "deprecated",
+      "integration_shape": "old cloud transport notes",
+      "notes": "Superseded by `streamable-http`; do not market as active integration."
+    }
+  ],
+  "self_test_commands": {
+    "local_generic": "pnpm run selftest -- --mode local",
+    "remote_generic": "pnpm run selftest -- --mode remote",
+    "cursor": "pnpm run selftest -- --host cursor",
+    "cline": "pnpm run selftest -- --host cline",
+    "windsurf": "pnpm run selftest -- --host windsurf",
+    "github_copilot": "pnpm run selftest -- --host github_copilot"
+  }
+}

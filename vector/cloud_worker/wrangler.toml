@@ -1,0 +1,26 @@
+name = "vector-cloud-mcp"
+main = "src/index.ts"
+compatibility_date = "2024-10-22"
+compatibility_flags = ["nodejs_compat"]
+
+# Stores persistent KB artifacts per project
+[[kv_namespaces]]
+binding = "VECTOR_KB_STORE"
+id = "put-your-kv-kb-id-here"
+
+# Validates billing and active SaaS subscriptions
+[[kv_namespaces]]
+binding = "LICENSE_STORE"
+id = "put-your-kv-license-id-here"
+
+# Handles Long-lived SSE connections on a single isolate
+[[durable_objects.bindings]]
+name = "MCP_DO"
+class_name = "McpDurableObject"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["McpDurableObject"]
+
+[vars]
+MCP_SPEC_VERSION = "2025-11-01"

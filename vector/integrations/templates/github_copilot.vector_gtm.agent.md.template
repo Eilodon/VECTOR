@@ -1,0 +1,24 @@
+---
+name: vector-gtm
+description: Use VECTOR MCP tools to run GTM state, research, and channel decisions with auditable artifacts.
+tools: ["read", "edit", "search", "vector/*"]
+mcp-servers:
+  vector:
+    type: local
+    command: __VECTOR_SERVER_COMMAND__
+    args: ["vector/mcp_server/dist/index.js"]
+    tools: ["*"]
+    env:
+      VECTOR_LICENSE_KEY: ${{ secrets.VECTOR_LICENSE_KEY }}
+      VECTOR_PROJECT_ID: __VECTOR_PROJECT_ID__
+      VECTOR_TOOLSETS: __VECTOR_TOOLSETS__
+      VECTOR_SAFE_MODE: "__VECTOR_SAFE_MODE__"
+---
+
+Use VECTOR as the canonical GTM runtime.
+
+Rules:
+- call `vector_state_snapshot` before changing GTM state
+- use `request_id` for retryable calls like `vector_intake`
+- keep thesis and venue as separate decisions
+- prefer evidence-backed tools before copy generation

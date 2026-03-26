@@ -1,0 +1,122 @@
+decision_policy:
+  version: v2.0.0
+  rules:
+    - condition: no_attempts
+      interpretation: execution_gap
+      action: reset_execution_plan
+    - condition: attempts_without_response
+      interpretation: angle_or_targeting_problem
+      action: rewrite_hook_and_validate_icp
+    - condition: responses_from_non_icp
+      interpretation: icp_drift
+      action: re_run_icp_phase
+    - condition: interest_without_conversion
+      interpretation: funnel_or_venue_issue
+      action: audit_offer_and_trust_signal
+    - condition: good_conversion_low_traffic
+      interpretation: channel_scale_problem
+      action: consider_growth_multiplier_later
+    - condition: repeated_failure_after_threshold
+      interpretation: structural_mismatch
+      action: pivot_channel_or_return_to_market_phase
+
+  thresholds:
+    green_signal_required_for_multiplier: true
+    stage_0_to_1_primary_channel_limit: 1
+    stage_0_to_1_paid_scaling_allowed: false
+    minimum_attempts_before_signal_verdict: 20
+
+  # [v2.0.0] 4 Forces routing — when buyer shows interest but doesn't convert
+  four_forces_routing:
+    - condition: interest_without_conversion AND anxiety_dominates
+      interpretation: buyer believes risk of switching > promise of outcome
+      action: audit_trust_signal_and_entry_offer_reversibility
+    - condition: interest_without_conversion AND habit_dominates
+      interpretation: current workaround is "good enough" — not enough urgency
+      action: magnify_cost_of_status_quo_in_copy_or_shrink_entry_offer
+    - condition: no_interest AND push_weak
+      interpretation: buyer not experiencing pain as acute — wrong trigger moment
+      action: re_examine_timing_assumption_in_icp
+    - condition: replies_but_wrong_icp
+      interpretation: pull is appealing but to wrong audience — channel mismatch
+      action: tighten_channel_filter_or_re_run_icp
+
+  # [v2.0.0] Recovery routing by drift type (aligns with signal skill)
+  recovery_rules:
+    - condition: drift_type=wrong_icp
+      interpretation: icp_hypothesis_failed
+      action: re_run_icp_phase
+      return_phase: icp
+    - condition: drift_type=wrong_channel
+      interpretation: icp_not_reachable_here
+      action: re_score_remaining_channel_candidates
+      return_phase: channel
+    - condition: drift_type=wrong_angle
+      interpretation: hook_or_positioning_off
+      action: rewrite_angle_in_thesis_keep_channel
+      return_phase: thesis
+    - condition: drift_type=wrong_venue
+      interpretation: buying_environment_mismatch
+      action: re_run_venue_phase
+      return_phase: venue
+    - condition: drift_type=weak_trust_signal
+      interpretation: anxiety_not_addressed
+      action: audit_trust_signal_and_entry_offer
+      return_phase: venue
+    - condition: drift_type=too_much_scope
+      interpretation: entry_offer_too_large
+      action: shrink_entry_offer_to_smallest_proof_unit
+      return_phase: venue
+    - condition: drift_type=too_much_noise
+      interpretation: channel_too_crowded_or_icp_distracted
+      action: move_to_lower_density_channel_from_gold_zone
+      return_phase: channel
+    - condition: repeated_drift
+      interpretation: routing_or_icp_mismatch
+      action: enter_recovery_mode
+    - condition: conflicting_artifacts
+      interpretation: source_of_truth_conflict
+      action: reconcile_against_canonical_schema
+    - condition: missing_install_support
+      interpretation: platform_setup_gap
+      action: load_platform_install_contract
+    - condition: research_needed
+      interpretation: evidence_gap
+      action: route_to_research_mode
+    - condition: copy_requested_before_thesis
+      interpretation: premature_messaging
+      action: re-run_thesis_or_channel_phase
+
+  # [v2.0.0] Founder Edge Audit enforcement
+  founder_edge_audit_rules:
+    - condition: channel_scoring_attempted_without_audit
+      interpretation: builder_advantage_is_estimated_not_measured
+      action: run_founder_edge_audit_first
+    - condition: audit_score_less_than_2_for_primary_channel
+      interpretation: founder_has_no_edge_here
+      action: flag_and_consider_alternative_channel_from_gold_zone
+
+  evidence_rules:
+    - assumption_without_evidence: allowed_only_with_explicit_label
+    - confidence_without_signal: not_allowed
+    - channel_scale_without_green_signal: not_allowed
+    - four_forces_null_values: not_allowed_after_icp_gate_cleared
+
+v1_5_enhancements:
+  rules:
+    - condition: copy_requested_before_thesis_lock
+      interpretation: premature_messaging
+      action: route_to_thesis_or_research_mode
+    - condition: research_without_next_experiment
+      interpretation: vague_evidence
+      action: tighten_research_question
+    - condition: trust_signal_missing
+      interpretation: venue_or_offer_gap
+      action: audit_venue_and_entry_offer
+    - condition: repeated_interest_without_conversion
+      interpretation: mismatch_or_friction
+      action: inspect_channel_and_venue_together
+  evidence_floor:
+    - do_not_promote_speculation_to_truth
+    - do_not_raise_confidence_without_new_signal
+    - do_not_change_thesis_from_copy_feedback_only

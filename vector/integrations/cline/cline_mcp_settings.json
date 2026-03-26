@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "vector": {
+      "command": "node",
+      "args": ["vector/mcp_server/dist/index.js"],
+      "env": {
+        "VECTOR_LICENSE_KEY": "vsk_replace_me",
+        "VECTOR_PROJECT_ID": "cline_local",
+        "VECTOR_TOOLSETS": "core,research,strategy,copy",
+        "VECTOR_SAFE_MODE": "true"
+      },
+      "alwaysAllow": [
+        "vector_state_snapshot",
+        "vector_intake",
+        "vector_list_toolsets",
+        "vector_list_toolset_tools"
+      ],
+      "disabled": false
+    }
+  }
+}

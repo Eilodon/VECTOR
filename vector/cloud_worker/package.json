@@ -1,0 +1,23 @@
+{
+  "name": "vector-cloud-mcp",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "itty-router": "^5.0.18",
+    "jose": "^6.2.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241022.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.4.5",
+    "wrangler": "^3.80.0"
+  }
+}

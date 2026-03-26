@@ -1,0 +1,33 @@
+{
+  "name": "vector-mcp-server",
+  "version": "2.0.0",
+  "description": "VECTOR MCP runtime for GTM automation",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node-esm index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "verify": "pnpm run typecheck && pnpm run build"
+  },
+  "keywords": [
+    "mcp",
+    "vector",
+    "gtm",
+    "automation",
+    "ai-agent"
+  ],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.32.1",
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "zod": "^4.3.6"
+  }
+}

@@ -1,0 +1,185 @@
+artifact_contracts:
+  intake_memo:
+    required:
+      - product
+      - problem
+      - target_persona
+      - why_now
+      - evidence_level
+      - constraint
+      - founder_edge_initial
+      - riskiest_assumption
+    gate_checklist:
+      - product_one_sentence: true
+      - problem_named_specifically: true
+      - persona_assumed: true
+      - why_now_exists: true
+      - constraint_noted: true
+      - evidence_tagged: true
+
+  icp_card:
+    required:
+      - job_statement
+      - who
+      - problem
+      - trigger_moment
+      - evidence
+      - riskiest_assumption
+      # [v2.0.0] New required fields
+      - four_forces            # push/pull/anxiety/habit all non-null
+      - evidence_tags          # per-claim taxonomy (observed/inferred/benchmarked/speculative)
+      - confidence
+      - top_unknown
+      - next_experiment
+    gate_checklist:
+      - job_statement_one_sentence: true
+      - four_forces_mapped: true
+      - riskiest_assumption_named: true
+      - evidence_tags_all_assigned: true
+      - kill_switch_check_passed: true
+
+  market_map:
+    required:
+      - stage_confirmed
+      - category_stance        # [v2.0.0] entering/reframing/creating
+      - competitor_map         # all 4 types: direct/substitutes/workflow/attention
+      - gold_zone_channels     # must pass 4-criteria white-space rubric
+      - red_ocean
+      - why_now_pressure
+    gate_checklist:
+      - stage_confirmed: true
+      - category_stance_selected: true
+      - competitor_map_has_do_nothing: true
+      - gold_zone_channels_min_2: true
+      - kill_switch_check_passed: true  # không chỉ "category hot"
+
+  channel_scorecard:
+    required:
+      - ranked_channels
+      - score_rationale
+      - eliminated_channels
+      - primary_channel
+      # [v2.0.0] New required fields
+      - founder_edge_audit     # per channel (0-5 score with 5 criteria)
+      - stage_weights_used     # which multiplier table was applied
+      - channel_score_normalized  # 0-100
+    gate_checklist:
+      - founder_edge_audit_run: true
+      - stage_weights_applied: true
+      - primary_channel_score_gte_50: true       # minimum threshold
+      - first_test_defined_time_boxed: true
+
+  thesis_card:
+    required:
+      - primary_channel
+      - why_this_channel
+      - angle
+      - growth_multiplier_type  # A/B/C/D or "not yet"
+      - unlock_condition
+      - reversibility
+      - confidence
+      - alternatives_rejected
+      - evidence_used
+    explicitly_excluded:        # [v2.0.0] these belong to venue, not thesis
+      - sales_venue
+      - product_architecture
+      - trust_signal
+      - icp_drift_check
+      - primary_cta
+    gate_checklist:
+      - primary_channel_single_selection: true
+      - growth_multiplier_typed: true           # not just "yes/no"
+      - confidence_with_rationale: true
+
+  venue_card:
+    required:
+      - sales_venue
+      - venue_format             # [v2.0.0] cụ thể hơn
+      - product_architecture     # entry/core/upsell
+      - trust_signal_level       # [v2.0.0] high/medium/low
+      - trust_signal_needed
+      - trust_signal_status      # [v2.0.0] have/need-to-build/not-needed
+      - venue_risk
+      - venue_risk_mitigation    # [v2.0.0]
+      - icp_drift_check
+      - primary_cta
+    gate_checklist:
+      - one_primary_cta: true
+      - trust_signal_calibrated_to_anxiety: true
+      - drift_check_specific_not_generic: true
+
+  signal_ledger:
+    required:
+      - milestone
+      - attempts
+      - response_quality
+      - conversion_status
+      - drift_status
+      - correction_applied
+      - next_check_date
+      # [v2.0.0] New required fields
+      - drift_type               # wrong_icp/wrong_channel/wrong_angle/wrong_venue/weak_trust/too_much_scope/too_much_noise
+      - recovery_routing         # which phase to return to
+      - hypothesis_tested
+      - sample_size
+      - decision_impact
+      - confidence_update        # increased/stable/decreased + reason
+
+  research_memo:
+    required:
+      - question
+      - evidence_table
+      - synthesis
+      - recommendation
+      - unknowns
+      - next_experiment
+    evidence_table_fields:
+      - source
+      - date_recency
+      - claim
+      - evidence_strength        # strong/medium/weak
+      - evidence_type            # observed/inferred/benchmarked
+      - relevance_to
+
+  copy_pack:
+    required:
+      - message_matrix
+      - variant_families         # [v2.0.0] curiosity/pain/outcome/trust/urgency
+      - proof_notes
+      - cta_options
+      - test_plan
+      # [v2.0.0] New required fields
+      - objection_map            # primary objection + copy job + placement
+      - qa_checklist             # 7-item QA before ship
+
+  copy_review:
+    required:
+      - reviewed_at
+      - overall_score
+      - ship_ready
+      - first_test_variant
+      - dimensions
+      - failed_checks
+      - recommendations
+
+
+common_fields:
+  required:
+    - artifact_name
+    - version
+    - phase
+    - owner
+    - purpose
+    - evidence_used
+    - decision
+    - next_action
+    - confidence_update          # every artifact must report confidence delta
+
+v2_0_principles:
+  - evidence_first: no claim without evidence tag
+  - gates_required: every phase exit requires gate checklist
+  - kill_switches_enforced: agent must flag when kill switch condition met
+  - no_venue_in_thesis: thesis card explicitly excludes venue fields
+  - founder_edge_audit_mandatory: channel scoring requires audit result
+  - four_forces_required: icp card without 4 Forces is incomplete
+  - objection_protocol_required: copy without objection map is incomplete

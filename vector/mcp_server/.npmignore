@@ -1,0 +1,21 @@
+# ============================================================
+# VECTOR MCP SERVER — .npmignore
+# ============================================================
+
+# Ignore everything
+/*
+
+# Except the distribution and necessary files
+!/dist/
+!/package.json
+!/README.md
+!/CHANGELOG.md
+!/LICENSE
+
+# Specifically ignore maps and typings generated files that might be in dist if they exist and are unwanted
+/dist/*.map
+/dist/*.tsbuildinfo
+
+# Ignore tests inside dist if any
+/dist/**/*.test.js
+/dist/**/*.spec.js

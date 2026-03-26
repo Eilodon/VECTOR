@@ -1,0 +1,92 @@
+session_contract:
+  version: v2.0.0
+  required_fields:
+    - persona
+    - mode
+    - platform
+    - phase
+    - milestone
+    - stage
+    - product_summary
+    - evidence
+    - decision_history
+    - next_action
+    # [v2.0.0] New required session fields
+    - gates                      # gate registry must be present
+    - schema_version             # must match expected version
+    - recovery_log               # even if empty
+    - objection_map              # even if null
+
+  sync_rules:
+    - keep_kb_and_session_aligned
+    - version_every_major_update
+    - never_overwrite_evidence_without_archive
+    - preserve_previous_decisions
+    # [v2.0.0] New sync rules
+    - run_contradiction_check_on_load
+    - update_recovery_log_on_every_loop_back
+    - update_founder_edge_audit_on_every_channel_considered
+    - preserve_gates_registry_across_sessions
+
+  # [v2.0.0] Session Resumption Protocol — 4 mandatory steps
+  session_resumption_protocol:
+    step_1_validate_version:
+      action: check schema_version against expected
+      if_mismatch: notify_user, add_missing_fields, do_not_refuse
+    step_2_contradiction_check:
+      action: scan gates section
+      rule_1: if gate=true AND required fields=null → treat gate=false, ask user confirm
+      rule_2: if phase advanced BUT gate not cleared → reset to phase with last cleared gate
+    step_3_phase_routing:
+      action: load from KB phase field
+      rule: do not auto-advance if gate of current phase is false
+      rule: if recovery_log has recent entry → read correction before proceeding
+    step_4_malformed_kb:
+      if_missing_sections: reconstruct from conversation history if available
+      if_no_conversation_history: restart from intake
+      never: invent state → must confirm with user
+
+  required_artifact_sequence:
+    - intake_memo
+    - icp_card
+    - market_map
+    - channel_scorecard
+    - thesis_card
+    - venue_card
+    - signal_ledger
+    - research_memo
+    - copy_pack
+
+  sync_priority:
+    - preserve_evidence
+    - preserve_decisions
+    - preserve_confidence_updates
+    - version_major_changes
+    - preserve_gates_state
+    - preserve_recovery_log
+
+v1_5_enhancements:
+  required_fields_additions:
+    - evidence_provenance
+    - decision_memo
+    - research_state
+    - copy_state
+    - next_check_date
+    - reversibility_note
+  sync_rules_additions:
+    - preserve_source_and_recency_on_research_notes
+    - preserve_thesis_lock_when_generating_copy
+    - record_artifact_version_on_every_major_edit
+
+v2_0_enhancements:
+  required_fields_additions:
+    - gates_registry
+    - recovery_log
+    - objection_map
+    - founder_edge_audit
+    - four_forces
+  sync_rules_additions:
+    - run_4_step_resumption_protocol_on_load
+    - block_phase_advance_when_gate_false
+    - enforce_thesis_venue_boundary
+    - require_founder_edge_audit_before_channel_scoring
