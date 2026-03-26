@@ -1146,6 +1146,16 @@ export function createVectorRuntime(initialOptions) {
     }
     function withIdempotency(action, handler) {
         return async (args) => {
+            // [ADR-001] Concurrency Lock: Reload state from disk before executing tool 
+            try {
+                const latestState = await RUNTIME.stateStore.load();
+                if (latestState) {
+                    VECTOR_STATE = syncCanonicalViews(latestState);
+                }
+            }
+            catch (e) {
+                RUNTIME.logger?.warn("Concurrency hook failed to load state:", e);
+            }
             const requestId = extractRequestId(args);
             if (requestId) {
                 const cached = VECTOR_STATE.request_registry?.[requestId];
@@ -2529,6 +2539,26 @@ export function createVectorRuntime(initialOptions) {
         },
     }, async ({ note }) => {
         const cleaned = sanitizeRecursive({ note });
+        // [ADR-002] KB-to-State Drift Prevention
+        if (RUNTIME.readKbContent) {
+            try {
+                const kbData = await RUNTIME.readKbContent();
+                if (kbData) {
+                    const phaseMatch = kbData.match(/phase:\s*([a-z_]+)/i);
+                    if (phaseMatch && phaseMatch[1]) {
+                        const kbPhase = phaseMatch[1].trim().toLowerCase();
+                        if (kbPhase !== VECTOR_STATE.phase) {
+                            throw new Error(`State Drift Detected [ADR-002]: KNOWLEDGE_BASE.md indicates phase '${kbPhase}', but MCP Server is in phase '${VECTOR_STATE.phase}'. Please use the appropriate vector_* tools to advance the state, instead of modifying the Markdown file manually.`);
+                        }
+                    }
+                }
+            }
+            catch (e) {
+                if (e instanceof Error && e.message.includes("State Drift Detected")) {
+                    throw e; // Rethrow drift errors to the LLM
+                }
+            }
+        }
         const nextState = {
             ...VECTOR_STATE,
             session: {
@@ -2725,9 +2755,9 @@ export function createVectorRuntime(initialOptions) {
             phase: nextPhase,
             milestone: PHASE_TO_MILESTONE[nextPhase],
             signals: {
-                green: [...VECTOR_STATE.signals.green, ...positives],
-                yellow: [...VECTOR_STATE.signals.yellow, ...ambers],
-                red: [...VECTOR_STATE.signals.red, ...negatives],
+                green: [...VECTOR_STATE.signals.green, ...positives].slice(-100),
+                yellow: [...VECTOR_STATE.signals.yellow, ...ambers].slice(-100),
+                red: [...VECTOR_STATE.signals.red, ...negatives].slice(-100),
             },
             icp_drift: redCount > greenCount ? "observed" : VECTOR_STATE.icp_drift,
             trauma_log: redCount > greenCount
@@ -2739,7 +2769,7 @@ export function createVectorRuntime(initialOptions) {
                         why_failed: "Recovery route recommended because the current thesis is underperforming.",
                         phase: VECTOR_STATE.phase,
                     },
-                ]
+                ].slice(-50)
                 : VECTOR_STATE.trauma_log,
             experiment_ledger: {
                 ...(VECTOR_STATE.experiment_ledger ?? { active: [], archived: [] }),

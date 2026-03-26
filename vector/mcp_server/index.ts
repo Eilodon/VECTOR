@@ -122,6 +122,13 @@ async function main() {
     runtimeLabel: RUNTIME_DIR,
     stateStore: localStateStore,
     graphStore: localGraphStore,
+    readKbContent: async () => {
+      try {
+        return await readFile(join(RUNTIME_DIR, "KNOWLEDGE_BASE.md"), "utf-8");
+      } catch {
+        return null;
+      }
+    },
     capabilityMode: {
       ...(requestedToolsets ? { toolsets: requestedToolsets } : {}),
       safeMode: parseSafeMode(process.env.VECTOR_SAFE_MODE),
