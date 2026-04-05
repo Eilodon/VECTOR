@@ -253,10 +253,10 @@ const tavilySearchProvider: SearchProvider = {
     const data = await fetchJson("https://api.tavily.com/search", {
       method: "POST",
       headers: {
+        authorization: `Bearer ${apiKey}`,
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        api_key: apiKey,
         query: input.query,
         max_results: input.max_results,
         search_depth: "basic",

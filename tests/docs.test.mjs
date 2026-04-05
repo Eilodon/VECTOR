@@ -74,9 +74,11 @@ test('auth and community vNext plan chooses Auth0-first resource server rollout'
 
 test('runtime keeps thesis and venue as separate tools', async () => {
   const runtime = await readText('vector/mcp_server/core.ts');
+  const workflowTools = await readText('vector/mcp_server/core_workflow_tools.ts');
   const contract = await import(new URL('vector/mcp_server/dist/workflow_contract.js', root).href);
-  assert.match(runtime, /"vector_thesis"/);
-  assert.match(runtime, /"vector_venue"/);
+  assert.match(runtime, /registerWorkflowTools/);
+  assert.match(workflowTools, /"vector_thesis"/);
+  assert.match(workflowTools, /"vector_venue"/);
   assert.match(runtime, /from "\.\/workflow_contract\.js"/);
   assert.ok(!runtime.includes('vector_thesis_venue'));
   assert.deepEqual(contract.WORKFLOW_PHASES, ['intake', 'icp', 'market', 'channel', 'thesis', 'venue', 'signal', 'recovery']);
@@ -87,17 +89,20 @@ test('runtime keeps thesis and venue as separate tools', async () => {
 
 test('runtime exposes a first-class research memo tool', async () => {
   const runtime = await readText('vector/mcp_server/core.ts');
-  assert.match(runtime, /"vector_research_memo"/);
-  assert.match(runtime, /ResearchMemoSchema/);
-  assert.match(runtime, /research_memo/);
+  const schemas = await readText('vector/mcp_server/core_schemas.ts');
+  const researchTools = await readText('vector/mcp_server/core_research_tools.ts');
+  assert.match(researchTools, /"vector_research_memo"/);
+  assert.match(runtime, /registerResearchTools/);
+  assert.match(schemas, /ResearchMemoSchema/);
+  assert.match(schemas, /research_memo/);
 });
 
 test('runtime exposes graph sync and query tools without making graph memory authoritative', async () => {
-  const runtime = await readText('vector/mcp_server/core.ts');
-  assert.match(runtime, /"vector_graph_sync"/);
-  assert.match(runtime, /"vector_graph_query"/);
-  assert.match(runtime, /Snapshot phase remains authoritative/);
-  assert.match(runtime, /Do not treat graph query output as a workflow phase override/);
+  const graphTools = await readText('vector/mcp_server/core_graph_tools.ts');
+  assert.match(graphTools, /"vector_graph_sync"/);
+  assert.match(graphTools, /"vector_graph_query"/);
+  assert.match(graphTools, /Snapshot phase remains authoritative/);
+  assert.match(graphTools, /Do not treat graph query output as a workflow phase override/);
 });
 
 test('integration status doc tracks maturity levels', async () => {

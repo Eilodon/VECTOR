@@ -69,6 +69,7 @@ Status truth remains in [INTEGRATION_STATUS.md](/home/ybao/B.1/VECTOR/vector/doc
 
 - Technical beta / local-style remote deploys can keep `Authorization: Bearer vsk_*`.
 - Production remote deploys can enable Auth0-backed OAuth access-token validation by setting `VECTOR_AUTH_ISSUER` and `VECTOR_AUTH_AUDIENCE`.
+- For Cloudflare deploys, store `VECTOR_AUTH_ISSUER`, `VECTOR_AUTH_AUDIENCE`, and `VECTOR_AUTH_JWKS_JSON` with `wrangler secret put`, not in plaintext `[vars]`.
 - Session routing still requires `x-vector-project-id` and `x-vector-session-owner` so KB ownership remains explicit.
 - Wave 2 anti-sharing is now partially implemented: principal-scoped session registry, per-tier concurrent-session caps, and review-first anomaly logs for device/IP drift.
 

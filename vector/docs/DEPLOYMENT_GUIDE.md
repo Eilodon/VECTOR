@@ -48,6 +48,7 @@ Auth truth:
 - Auth0-compatible JWT access tokens are accepted when `VECTOR_AUTH_ISSUER` and `VECTOR_AUTH_AUDIENCE` are configured.
 - `VECTOR_ALLOW_LICENSE_FALLBACK=false` disables static-license bearer fallback for production rollout.
 - Session concurrency and anomaly policy can be tuned with `VECTOR_AUTH_MAX_SESSIONS_*`, `VECTOR_AUTH_SESSION_IDLE_TTL_MS`, and `VECTOR_AUTH_ANOMALY_LOG_LIMIT`.
+- For Cloudflare Workers, store `VECTOR_AUTH_ISSUER`, `VECTOR_AUTH_AUDIENCE`, and `VECTOR_AUTH_JWKS_JSON` with `wrangler secret put` instead of committing them in `[vars]`.
 
 Persistence semantics:
 - the authoritative snapshot remains in durable object storage for one ownership tuple

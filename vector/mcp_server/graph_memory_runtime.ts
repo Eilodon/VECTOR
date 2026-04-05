@@ -29,6 +29,8 @@ export type GraphMemoryLike = {
   sync_history: Array<Record<string, unknown>>;
 };
 
+export const MAX_GRAPH_PROVENANCE_ENTRIES = 25;
+
 export function slugify(value: string): string {
   return value
     .toLowerCase()
@@ -49,6 +51,35 @@ function mergeUniqueStrings(...collections: Array<string[] | undefined>): string
   )];
 }
 
+function provenanceFingerprint(entry: Record<string, unknown>): string {
+  const evidenceIds = Array.isArray(entry.evidence_ids)
+    ? [...entry.evidence_ids].map((item) => String(item)).sort()
+    : [];
+  const providerRunIds = Array.isArray(entry.provider_run_ids)
+    ? [...entry.provider_run_ids].map((item) => String(item)).sort()
+    : [];
+  return JSON.stringify({
+    source_kind: entry.source_kind ?? null,
+    source_ref: entry.source_ref ?? null,
+    phase: entry.phase ?? null,
+    recorded_at: entry.recorded_at ?? null,
+    evidence_ids: evidenceIds,
+    provider_run_ids: providerRunIds,
+  });
+}
+
+function mergeBoundedProvenance(
+  existing: Array<Record<string, unknown>>,
+  incoming: Array<Record<string, unknown>>,
+  maxEntries = MAX_GRAPH_PROVENANCE_ENTRIES,
+): Array<Record<string, unknown>> {
+  const merged = new Map<string, Record<string, unknown>>();
+  for (const entry of [...existing, ...incoming]) {
+    merged.set(provenanceFingerprint(entry), entry);
+  }
+  return [...merged.values()].slice(-maxEntries);
+}
+
 function upsertGraphNode(graph: GraphMemoryLike, node: Omit<GraphNodeLike, "first_seen_at" | "last_seen_at">, now?: string): void {
   const recordedAt = timestamp(now);
   const existingIndex = graph.nodes.findIndex((item) => item.id === node.id);
@@ -65,7 +96,7 @@ function upsertGraphNode(graph: GraphMemoryLike, node: Omit<GraphNodeLike, "firs
   graph.nodes[existingIndex] = {
     ...existing,
     ...node,
-    provenance: [...existing.provenance, ...node.provenance],
+    provenance: mergeBoundedProvenance(existing.provenance, node.provenance),
     first_seen_at: existing.first_seen_at,
     last_seen_at: recordedAt,
   };
@@ -87,7 +118,7 @@ function upsertGraphEdge(graph: GraphMemoryLike, edge: Omit<GraphEdgeLike, "firs
   graph.edges[existingIndex] = {
     ...existing,
     ...edge,
-    provenance: [...existing.provenance, ...edge.provenance],
+    provenance: mergeBoundedProvenance(existing.provenance, edge.provenance),
     first_seen_at: existing.first_seen_at,
     last_seen_at: recordedAt,
   };

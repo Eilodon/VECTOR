@@ -1,3 +1,4 @@
+export const MAX_GRAPH_PROVENANCE_ENTRIES = 25;
 export function slugify(value) {
     return value
         .toLowerCase()
@@ -12,6 +13,29 @@ function mergeUniqueStrings(...collections) {
     return [...new Set(collections.flatMap((items) => items ?? [])
             .map((item) => item.trim())
             .filter((item) => Boolean(item)))];
+}
+function provenanceFingerprint(entry) {
+    const evidenceIds = Array.isArray(entry.evidence_ids)
+        ? [...entry.evidence_ids].map((item) => String(item)).sort()
+        : [];
+    const providerRunIds = Array.isArray(entry.provider_run_ids)
+        ? [...entry.provider_run_ids].map((item) => String(item)).sort()
+        : [];
+    return JSON.stringify({
+        source_kind: entry.source_kind ?? null,
+        source_ref: entry.source_ref ?? null,
+        phase: entry.phase ?? null,
+        recorded_at: entry.recorded_at ?? null,
+        evidence_ids: evidenceIds,
+        provider_run_ids: providerRunIds,
+    });
+}
+function mergeBoundedProvenance(existing, incoming, maxEntries = MAX_GRAPH_PROVENANCE_ENTRIES) {
+    const merged = new Map();
+    for (const entry of [...existing, ...incoming]) {
+        merged.set(provenanceFingerprint(entry), entry);
+    }
+    return [...merged.values()].slice(-maxEntries);
 }
 function upsertGraphNode(graph, node, now) {
     const recordedAt = timestamp(now);
@@ -30,7 +54,7 @@ function upsertGraphNode(graph, node, now) {
     graph.nodes[existingIndex] = {
         ...existing,
         ...node,
-        provenance: [...existing.provenance, ...node.provenance],
+        provenance: mergeBoundedProvenance(existing.provenance, node.provenance),
         first_seen_at: existing.first_seen_at,
         last_seen_at: recordedAt,
     };
@@ -52,7 +76,7 @@ function upsertGraphEdge(graph, edge, now) {
     graph.edges[existingIndex] = {
         ...existing,
         ...edge,
-        provenance: [...existing.provenance, ...edge.provenance],
+        provenance: mergeBoundedProvenance(existing.provenance, edge.provenance),
         first_seen_at: existing.first_seen_at,
         last_seen_at: recordedAt,
     };

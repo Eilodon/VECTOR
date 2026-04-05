@@ -10,6 +10,7 @@ export const SOURCE_FRESHNESS_DAYS = {
     benchmark: 180,
     other: 30,
 };
+export const MAX_RESEARCH_EVIDENCE_ITEMS = 500;
 export const CHANNEL_BENCHMARK_LIBRARY = {
     "cold email": {
         minimum_attempts: 20,
@@ -263,6 +264,13 @@ function resolveEvidence(researchMemo, evidenceIds) {
 function mergeUniqueStrings(...collections) {
     return [...new Set(collections.flatMap((items) => items ?? []).map((item) => item.trim()).filter(Boolean))];
 }
+export function mergeBoundedEvidence(existing, incoming, maxEntries = MAX_RESEARCH_EVIDENCE_ITEMS) {
+    const merged = new Map();
+    for (const item of [...existing, ...incoming]) {
+        merged.set(item.id, item);
+    }
+    return [...merged.values()].slice(-maxEntries);
+}
 function benchmarkNote(channel) {
     const benchmark = CHANNEL_BENCHMARK_LIBRARY[channel.toLowerCase()];
     if (!benchmark)
@@ -492,7 +500,7 @@ export function mergeResearchMemoFromProvider(existing, query, providerRun, payl
         ...existing,
         question: query,
         provider_runs: [...existing.provider_runs, providerRun],
-        evidence_table: [...existing.evidence_table, ...normalizedEvidence],
+        evidence_table: mergeBoundedEvidence(existing.evidence_table, normalizedEvidence),
         competitors: mergeUniqueStrings(existing.competitors, collectEntityLabels(payloads, "competitor")),
         substitutes: mergeUniqueStrings(existing.substitutes, collectEntityLabels(payloads, "substitute")),
         workflow_competitors: mergeUniqueStrings(existing.workflow_competitors, collectEntityLabels(payloads, "workflow_competitor")),

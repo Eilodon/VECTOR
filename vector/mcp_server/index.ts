@@ -1,5 +1,5 @@
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { access, mkdir, readFile, readdir, rename, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import { join } from "node:path";
 import * as os from "node:os";
@@ -24,6 +24,10 @@ const RUNTIME_DIR = process.env.VECTOR_KB_PATH ? join(process.env.VECTOR_KB_PATH
 const STATE_FILE = join(RUNTIME_DIR, "vector_state.json");
 const GRAPH_FILE = join(RUNTIME_DIR, "vector_graph_memory.json");
 const LOG_DIR = join(os.homedir(), ".vector", "logs");
+const TELEMETRY_LOG_FILE = join(LOG_DIR, "telemetry.jsonl");
+const TELEMETRY_ROTATED_FILE = join(LOG_DIR, "telemetry.jsonl.1");
+const TELEMETRY_ARCHIVED_FILE = join(LOG_DIR, "telemetry.jsonl.2");
+const MAX_TELEMETRY_LOG_BYTES = 1_000_000;
 
 function parseCapabilityToolsets(raw: string | undefined): string[] | undefined {
   if (!raw?.trim()) {
@@ -107,8 +111,18 @@ const localGraphStore: VectorGraphStore = {
 async function logTelemetry(event: string, meta: Record<string, unknown>) {
   try {
     await ensureDir(LOG_DIR);
+    try {
+      const current = await stat(TELEMETRY_LOG_FILE);
+      if (current.size >= MAX_TELEMETRY_LOG_BYTES) {
+        if (await pathExists(TELEMETRY_ROTATED_FILE)) {
+          await rm(TELEMETRY_ARCHIVED_FILE, { force: true });
+          await rename(TELEMETRY_ROTATED_FILE, TELEMETRY_ARCHIVED_FILE);
+        }
+        await rename(TELEMETRY_LOG_FILE, TELEMETRY_ROTATED_FILE);
+      }
+    } catch {}
     await writeFile(
-      join(LOG_DIR, "telemetry.jsonl"),
+      TELEMETRY_LOG_FILE,
       JSON.stringify({ timestamp: new Date().toISOString(), event, project_id: PROJECT_ID, ...meta }) + "\n",
       { flag: "a" },
     );

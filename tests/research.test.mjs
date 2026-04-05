@@ -10,22 +10,26 @@ async function readText(path) {
 
 test('channel and venue scoring can use research memo adjustments', async () => {
   const runtime = await readText('vector/mcp_server/core.ts');
+  const workflowTools = await readText('vector/mcp_server/core_workflow_tools.ts');
   assert.match(runtime, /researchChannelAdjustment/);
   assert.match(runtime, /researchVenueAdjustment/);
-  assert.match(runtime, /VECTOR_STATE\.research_memo/);
+  assert.match(workflowTools, /research_memo/);
 });
 
 test('research automation tools and freshness policy exist', async () => {
   const runtime = await readText('vector/mcp_server/core.ts');
+  const researchTools = await readText('vector/mcp_server/core_research_tools.ts');
+  const workflowHelpers = await readText('vector/mcp_server/core_workflow_helpers.ts');
   const providerContract = await readText('vector/mcp_server/research_provider_contract.ts');
-  assert.match(runtime, /"vector_source_capture"/);
-  assert.match(runtime, /"vector_research_search"/);
-  assert.match(runtime, /"vector_list_research_providers"/);
-  assert.match(runtime, /"vector_competitor_map"/);
-  assert.match(runtime, /"vector_channel_evidence"/);
+  assert.match(runtime, /registerResearchTools/);
+  assert.match(researchTools, /"vector_source_capture"/);
+  assert.match(researchTools, /"vector_research_search"/);
+  assert.match(researchTools, /"vector_list_research_providers"/);
+  assert.match(researchTools, /"vector_competitor_map"/);
+  assert.match(researchTools, /"vector_channel_evidence"/);
   assert.match(runtime, /SOURCE_FRESHNESS_DAYS/);
-  assert.match(runtime, /evidence-first blend/);
-  assert.match(runtime, /benchmark_key/);
+  assert.match(workflowHelpers, /evidence-first blend/);
+  assert.match(researchTools, /benchmark_key/);
   assert.match(providerContract, /"search"/);
   assert.match(providerContract, /"crawl"/);
   assert.match(providerContract, /"extract"/);
@@ -34,12 +38,13 @@ test('research automation tools and freshness policy exist', async () => {
 });
 
 test('runtime writes experiment ledger rows and gates copy behind venue', async () => {
-  const runtime = await readText('vector/mcp_server/core.ts');
-  assert.match(runtime, /experiment_ledger/);
-  assert.match(runtime, /vector_signal_review/);
-  assert.match(runtime, /vector_sales_copy/);
-  assert.match(runtime, /Sales copy requires both thesis_card and venue_card/);
-  assert.match(runtime, /const nextPhase: z\.infer<typeof PhaseSchema> = "venue"/);
+  const workflowTools = await readText('vector/mcp_server/core_workflow_tools.ts');
+  const copyTools = await readText('vector/mcp_server/core_copy_tools.ts');
+  assert.match(workflowTools, /experiment_ledger/);
+  assert.match(workflowTools, /vector_signal_review/);
+  assert.match(copyTools, /vector_sales_copy/);
+  assert.match(copyTools, /Sales copy requires both thesis_card and venue_card/);
+  assert.match(workflowTools, /const nextPhase = "venue"/);
 });
 
 test('production search providers derive structured observations from generic search results', async () => {

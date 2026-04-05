@@ -24,3 +24,8 @@ new_classes = ["McpDurableObject"]
 
 [vars]
 MCP_SPEC_VERSION = "2025-11-01"
+
+# Keep auth secrets out of [vars]. Configure sensitive auth settings with:
+#   wrangler secret put VECTOR_AUTH_ISSUER
+#   wrangler secret put VECTOR_AUTH_AUDIENCE
+#   wrangler secret put VECTOR_AUTH_JWKS_JSON
