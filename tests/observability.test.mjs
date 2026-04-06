@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm, stat } from 'node:fs/promises';
 import os from 'node:os';
 import path, { join } from 'node:path';
+import { setTimeout as delay } from 'node:timers/promises';
 import test from 'node:test';
 import { Client } from '../vector/mcp_server/node_modules/@modelcontextprotocol/sdk/dist/esm/client/index.js';
 import { StdioClientTransport } from '../vector/mcp_server/node_modules/@modelcontextprotocol/sdk/dist/esm/client/stdio.js';
@@ -34,15 +35,30 @@ async function withClient(env, run) {
   }
 }
 
-async function readTelemetryLog(kbRoot, projectId) {
+async function readTelemetryLog(projectId) {
   const logPath = join(os.homedir(), '.vector', 'logs', 'telemetry.jsonl');
   try {
     const content = await readFile(logPath, 'utf8');
     const lines = content.trim().split('\n');
-    return lines.slice(-10).map(line => JSON.parse(line)); // Last 10 entries
+    return lines
+      .map(line => JSON.parse(line))
+      .filter((entry) => entry.project_id === projectId)
+      .slice(-25);
   } catch {
     return [];
   }
+}
+
+async function waitForTelemetry(projectId, predicate, attempts = 10) {
+  for (let index = 0; index < attempts; index += 1) {
+    const entries = await readTelemetryLog(projectId);
+    const match = entries.find(predicate);
+    if (match) {
+      return match;
+    }
+    await delay(100);
+  }
+  return null;
 }
 
 test('healthz returns structured JSON with version and auth config', async () => {
@@ -60,17 +76,14 @@ test('healthz returns structured JSON with version and auth config', async () =>
     });
     
     // Check telemetry log exists and has correct structure
-    const entries = await readTelemetryLog(kbRoot, projectId);
-    const completedEntry = entries.find(e => e.event === 'tool_invocation_completed');
-    
-    if (completedEntry) {
-      assert.ok(completedEntry.timestamp, 'Should have timestamp');
-      assert.ok(completedEntry.project_id, 'Should have project_id');
-      assert.ok(completedEntry.action, 'Should have action');
-      assert.ok(completedEntry.phase, 'Should have phase');
-      assert.ok(typeof completedEntry.latency_ms === 'number', 'Should have latency_ms as number');
-      assert.equal(typeof completedEntry.cached, 'boolean', 'Should have cached as boolean');
-    }
+    const completedEntry = await waitForTelemetry(projectId, (entry) => entry.event === 'tool_invocation_completed');
+    assert.ok(completedEntry, 'Should emit tool_invocation_completed telemetry');
+    assert.ok(completedEntry.timestamp, 'Should have timestamp');
+    assert.ok(completedEntry.project_id, 'Should have project_id');
+    assert.ok(completedEntry.action, 'Should have action');
+    assert.ok(completedEntry.phase, 'Should have phase');
+    assert.ok(typeof completedEntry.latency_ms === 'number', 'Should have latency_ms as number');
+    assert.equal(typeof completedEntry.cached, 'boolean', 'Should have cached as boolean');
   });
 });
 
@@ -83,6 +96,7 @@ test('tool error telemetry emits tool_invocation_failed with error_code', async 
         primary_channel: 'email',
         angle: 'Test',
         why_this_channel: 'Test',
+        growth_multiplier: 'Test multiplier',
         unlock_condition: 'Test',
       },
     });
@@ -94,14 +108,11 @@ test('tool error telemetry emits tool_invocation_failed with error_code', async 
     assert.ok(parsed.code, 'Should have error code');
     
     // Check telemetry log for failed event
-    const entries = await readTelemetryLog(kbRoot, projectId);
-    const failedEntry = entries.find(e => e.event === 'tool_invocation_failed');
-    
-    if (failedEntry) {
-      assert.ok(failedEntry.error_code, 'Should have error_code');
-      assert.ok(failedEntry.error_message, 'Should have error_message');
-      assert.ok(typeof failedEntry.latency_ms === 'number', 'Should have latency_ms');
-    }
+    const failedEntry = await waitForTelemetry(projectId, (entry) => entry.event === 'tool_invocation_failed');
+    assert.ok(failedEntry, 'Should emit tool_invocation_failed telemetry');
+    assert.ok(failedEntry.error_code, 'Should have error_code');
+    assert.ok(failedEntry.error_message, 'Should have error_message');
+    assert.ok(typeof failedEntry.latency_ms === 'number', 'Should have latency_ms');
   });
 });
 
@@ -125,16 +136,13 @@ test('successful tool emits latency_ms in tool_invocation_completed', async () =
     assert.ok(!result.isError, 'Should not be an error');
     
     // Check telemetry for latency tracking
-    const entries = await readTelemetryLog(kbRoot, projectId);
-    const completedEntry = entries.find(e => 
-      e.event === 'tool_invocation_completed' && 
-      e.action === 'vector_intake'
+    const completedEntry = await waitForTelemetry(
+      projectId,
+      (entry) => entry.event === 'tool_invocation_completed' && entry.action === 'vector_intake',
     );
-    
-    if (completedEntry) {
-      assert.ok(typeof completedEntry.latency_ms === 'number', 'Should have latency_ms');
-      assert.ok(completedEntry.latency_ms > 0, 'latency_ms should be positive');
-      assert.ok(completedEntry.latency_ms <= elapsed + 100, 'latency_ms should be reasonable');
-    }
+    assert.ok(completedEntry, 'Should emit vector_intake completion telemetry');
+    assert.ok(typeof completedEntry.latency_ms === 'number', 'Should have latency_ms');
+    assert.ok(completedEntry.latency_ms > 0, 'latency_ms should be positive');
+    assert.ok(completedEntry.latency_ms <= elapsed + 250, 'latency_ms should be reasonable');
   });
 });

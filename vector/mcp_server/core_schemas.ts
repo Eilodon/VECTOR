@@ -282,6 +282,7 @@ export const VectorGraphMemorySchema = z.object({
 export const RequestRegistryEntrySchema = z.object({
   action: z.string(),
   response_text: z.string(),
+  structured_content: z.record(z.string(), z.unknown()).optional(),
   updated_at: z.string(),
 });
 export const ProductStateSchema = z.object({

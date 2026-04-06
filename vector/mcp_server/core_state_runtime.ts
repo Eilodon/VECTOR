@@ -291,7 +291,11 @@ export function createStateRuntime(deps: {
         }
       }
 
-      void deps.telemetry?.()?.("tool_invocation_completed", { action, phase: nextCommittedState.phase, stage: nextCommittedState.stage });
+      await deps.telemetry?.()?.("state_commit_completed", {
+        action,
+        phase: nextCommittedState.phase,
+        stage: nextCommittedState.stage,
+      });
       return deps.getState();
     };
     const result = commitQueue.then(run, run);

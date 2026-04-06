@@ -309,6 +309,7 @@ const idempotencyRuntime = createIdempotencyRuntime({
   maxRequestRegistryEntries: MAX_REQUEST_REGISTRY_ENTRIES,
   now,
   logger: () => RUNTIME?.logger,
+  telemetry: () => RUNTIME?.telemetry,
   loadLatestState: async () => RUNTIME.stateStore.load(),
   saveState,
   syncCanonicalViews,

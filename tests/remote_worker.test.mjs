@@ -145,6 +145,13 @@ function createFetch(workerModule, env) {
   };
 }
 
+async function rateLimitKey(principal) {
+  const bytes = new TextEncoder().encode(principal);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  const hash = Array.from(new Uint8Array(digest), (item) => item.toString(16).padStart(2, '0')).join('');
+  return `vector:ratelimit:${hash}`;
+}
+
 async function connectRemoteClient(workerModule, env, headers) {
   const transport = new StreamableHTTPClientTransport(new URL('https://vector.test/mcp'), {
     fetch: createFetch(workerModule, env),
@@ -343,6 +350,35 @@ test('remote worker logs anomaly events for device and IP drift without blocking
     assert.ok(events.some((event) => event.event === 'ip_range_changed'));
   } finally {
     await firstTransport?.close().catch(() => {});
+    await rm(tmpRoot, { recursive: true, force: true });
+  }
+});
+
+test('remote worker returns 429 when per-principal request rate limit is exceeded', async () => {
+  const { tmpRoot, workerModule } = await compileCloudWorkerForTest();
+  const { env } = createWorkerEnv(workerModule);
+  const principal = 'vsk_remote_test';
+  const key = await rateLimitKey(principal);
+  await env.VECTOR_KB_STORE.put(key, JSON.stringify({
+    count: 60,
+    window_start: new Date().toISOString(),
+  }));
+
+  try {
+    const response = await workerModule.default.fetch(new Request('https://vector.test/mcp', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${principal}`,
+        [workerModule.VECTOR_PROJECT_HEADER]: 'rate_limit_project',
+        [workerModule.VECTOR_SESSION_OWNER_HEADER]: 'owner_rate_limit',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: {} }),
+    }), env);
+
+    assert.equal(response.status, 429);
+    assert.match(await response.text(), /rate limit \(60\/min\) exceeded/i);
+  } finally {
     await rm(tmpRoot, { recursive: true, force: true });
   }
 });

@@ -1,6 +1,49 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { VectorError } from "./core_error_codes.js";
 
+type ToolStructuredContent = {
+  title?: string;
+  summary?: string;
+  decisions?: string[];
+  next_actions?: string[];
+  state_delta?: Record<string, unknown>;
+  payload?: Record<string, unknown>;
+};
+
+type ToolResponse = {
+  content: Array<{ type: "text"; text: string }>;
+  structuredContent?: ToolStructuredContent;
+  isError?: true;
+};
+
+function normalizeToolResult(toolName: string, result: ToolResponse): ToolResponse {
+  if (result.isError || result.structuredContent) {
+    return result;
+  }
+  const text = result.content
+    .filter((item) => item.type === "text")
+    .map((item) => item.text)
+    .join("\n\n");
+  const firstLine = text.split("\n").find((line) => line.trim().length > 0) ?? "";
+  const title = firstLine.startsWith("# ") ? firstLine.slice(2).trim() : toolName;
+  const summary = text
+    .split("\n")
+    .map((line) => line.trim())
+    .find((line) => line.length > 0 && !line.startsWith("#")) ?? (text.trim() || `${toolName} completed.`);
+
+  return {
+    ...result,
+    structuredContent: {
+      title,
+      summary,
+      decisions: [],
+      next_actions: [],
+      state_delta: {},
+      payload: { text },
+    },
+  };
+}
+
 export function createToolRegistrar(deps: {
   currentVersion: () => string;
   serverName: () => string | undefined;
@@ -44,17 +87,6 @@ export function createToolRegistrar(deps: {
         {
           ...definition.config,
           inputSchema: deps.withRequestSchema(definition.config.inputSchema),
-          outputSchema: definition.config.outputSchema ?? {
-            type: "object",
-            properties: {
-              title: { type: "string" },
-              summary: { type: "string" },
-              decisions: { type: "array", items: { type: "string" } },
-              next_actions: { type: "array", items: { type: "string" } },
-              state_delta: { type: "object" },
-              payload: { type: "object" },
-            },
-          },
         },
         deps.withIdempotency(definition.name, async (args: any) => {
           if (capabilityState.safeMode && policy.safe_mode_blocked) {
@@ -64,7 +96,7 @@ export function createToolRegistrar(deps: {
               { tool: definition.name }
             );
           }
-          return definition.handler(args);
+          return normalizeToolResult(definition.name, await definition.handler(args));
         }),
       );
     }

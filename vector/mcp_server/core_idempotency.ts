@@ -1,6 +1,21 @@
 import { z } from "zod";
 import { VectorError, toolError, toVectorError } from "./core_error_codes.js";
 
+type ToolStructuredContent = {
+  title?: string;
+  summary?: string;
+  decisions?: string[];
+  next_actions?: string[];
+  state_delta?: Record<string, unknown>;
+  payload?: Record<string, unknown>;
+};
+
+type ToolResponse = {
+  content: Array<{ type: "text"; text: string }>;
+  structuredContent?: ToolStructuredContent;
+  isError?: true;
+};
+
 export function withRequestSchema<T extends Record<string, z.ZodTypeAny>>(shape: T): T & { request_id: z.ZodOptional<z.ZodString> } {
   return {
     request_id: z.string().min(8).max(128).regex(/^[a-zA-Z0-9:_-]+$/).optional().describe("Optional request id for idempotent retries."),
@@ -61,7 +76,7 @@ export function createIdempotencyRuntime(deps: {
     return result;
   }
 
-  async function cacheRequestResponse(requestId: string, action: string, response: { content: Array<{ text: string }> }): Promise<void> {
+  async function cacheRequestResponse(requestId: string, action: string, response: ToolResponse): Promise<void> {
     const state = deps.getState();
     const responseText = response.content.map((item) => item.text).join("\n\n");
     const nextProcessedRequests = [...(state.logs?.processed_requests ?? []), requestId].slice(-deps.maxProcessedRequests);
@@ -70,6 +85,7 @@ export function createIdempotencyRuntime(deps: {
       [requestId]: {
         action,
         response_text: responseText,
+        structured_content: response.structuredContent,
         updated_at: deps.now(),
       },
     });
@@ -85,7 +101,7 @@ export function createIdempotencyRuntime(deps: {
     await deps.saveState(nextState);
   }
 
-  function withIdempotency<T extends { content: Array<{ type: "text"; text: string }> }>(
+  function withIdempotency<T extends ToolResponse>(
     action: string,
     handler: (args: any) => Promise<T>,
   ) {
@@ -107,7 +123,10 @@ export function createIdempotencyRuntime(deps: {
         if (requestId) {
           const cached = state.request_registry?.[requestId];
           if (cached && cached.action === action) {
-            return { content: [{ type: "text", text: cached.response_text }] } as T;
+            return {
+              content: [{ type: "text", text: cached.response_text }],
+              ...(cached.structured_content ? { structuredContent: cached.structured_content as ToolStructuredContent } : {}),
+            } as T;
           }
         }
 
@@ -116,7 +135,7 @@ export function createIdempotencyRuntime(deps: {
           const latencyMs = Date.now() - startMs;
           
           // Emit success telemetry
-          void deps.telemetry?.()?.("tool_invocation_completed", {
+          await deps.telemetry?.()?.("tool_invocation_completed", {
             action,
             phase: state.phase,
             latency_ms: latencyMs,
@@ -133,7 +152,7 @@ export function createIdempotencyRuntime(deps: {
           const vectorError = toVectorError(error);
           
           // Emit error telemetry
-          void deps.telemetry?.()?.("tool_invocation_failed", {
+          await deps.telemetry?.()?.("tool_invocation_failed", {
             action,
             phase: state.phase,
             latency_ms: latencyMs,

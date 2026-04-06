@@ -43,6 +43,7 @@ test('phase guard failure returns isError:true with PHASE_GUARD_FAILED code', as
         primary_channel: 'email',
         angle: 'Test angle',
         why_this_channel: 'Test reason',
+        growth_multiplier: 'Test multiplier',
         unlock_condition: 'Test condition',
       },
     });
