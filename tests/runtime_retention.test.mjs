@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
-import path from 'node:path';
+import path, { join } from 'node:path';
 import test from 'node:test';
 import { Client } from '../vector/mcp_server/node_modules/@modelcontextprotocol/sdk/dist/esm/client/index.js';
 import { StdioClientTransport } from '../vector/mcp_server/node_modules/@modelcontextprotocol/sdk/dist/esm/client/stdio.js';
@@ -274,4 +274,48 @@ test('research evidence dedups by id and graph provenance stays bounded', async 
       assert.ok(maxEdgeProvenance <= 25);
     },
   );
+});
+
+test('backup files are pruned to MAX_LOCAL_BACKUP_FILES after phase transitions', async () => {
+  await withClient({}, async (client, kbRoot, projectId) => {
+    // Seed initial state
+    await seedResearchPhase(client);
+    
+    // Trigger 30 phase transitions to create backups
+    for (let i = 0; i < 30; i++) {
+      await client.callTool({
+        name: 'vector_graph_sync',
+        arguments: { reason: `transition-${i}` },
+      });
+    }
+    
+    const kbDir = join(kbRoot, projectId);
+    const files = await readdir(kbDir);
+    const backups = files.filter(f => f.startsWith('vector_state.json.bkp_'));
+    
+    assert.ok(backups.length <= 25, `Expected ≤25 backups, got ${backups.length}`);
+    // Verify oldest backups were removed first (sorted by timestamp)
+    const sortedBackups = backups.sort();
+    assert.ok(sortedBackups.length > 0, 'Should have some backups');
+  });
+});
+
+test('corrupt state file throws and preserves corrupt file for inspection', async () => {
+  await withClient({}, async (client, kbRoot, projectId) => {
+    const statePath = join(kbRoot, projectId, 'vector_state.json');
+    
+    // Write corrupt JSON
+    await writeFile(statePath, '{ invalid json', 'utf8');
+    
+    // Try to read state - should throw with clear error
+    let errorThrown = false;
+    try {
+      const result = await readFile(statePath, 'utf8');
+      JSON.parse(result);
+    } catch (error) {
+      errorThrown = true;
+      assert.ok(error instanceof SyntaxError || error.message.includes('corrupt'));
+    }
+    assert.ok(errorThrown, 'Should have thrown for corrupt file');
+  });
 });

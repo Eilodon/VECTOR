@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.0.1] - 2026-04-06
+
+### Added
+- Local backup pruning with 25-file limit (matches Durable Object behavior)
+- State and graph file integrity checks with corrupt file preservation
+- CONTRIBUTING.md with module map and contribution guidelines
+- .env.example template for environment setup
+
+### Changed
+- Refactored monolithic core.ts (3,523 lines) into 14 focused modules
+- Zod version unified to ^4.3.6 across packages
+- Tavily API key moved to Authorization: Bearer header
+
+### Fixed
+- Race condition: state reload in serialized tool execution queue
+- Telemetry: Added foundation for latency tracking and error telemetry
+- Request registry: LRU eviction at 500 entries
+- Graph provenance: Bounded at 25 entries with fingerprint-based dedup
+- Evidence table: Bounded at 500 entries with id-based dedup
+
+---
+
 ## [2.0.0] - 2026-03-26
 
 ### Added

@@ -6,7 +6,7 @@ export function createToolRegistrar(deps: {
   getCapabilityState: () => { toolsets: string[]; safeMode: boolean };
   getToolDefinitions: () => Array<{
     name: string;
-    config: { description: string; inputSchema: any };
+    config: { description: string; inputSchema: any; outputSchema?: any };
     handler: (args: any) => Promise<any>;
   }>;
   capabilityPolicy: (toolName: string) => { toolset: string; safe_mode_blocked?: boolean } | null | undefined;
@@ -39,6 +39,17 @@ export function createToolRegistrar(deps: {
         {
           ...definition.config,
           inputSchema: deps.withRequestSchema(definition.config.inputSchema),
+          outputSchema: definition.config.outputSchema ?? {
+            type: "object",
+            properties: {
+              title: { type: "string" },
+              summary: { type: "string" },
+              decisions: { type: "array", items: { type: "string" } },
+              next_actions: { type: "array", items: { type: "string" } },
+              state_delta: { type: "object" },
+              payload: { type: "object" },
+            },
+          },
         },
         deps.withIdempotency(definition.name, async (args: any) => {
           if (capabilityState.safeMode && policy.safe_mode_blocked) {

@@ -56,6 +56,19 @@ async function pathExists(path: string): Promise<boolean> {
   }
 }
 
+const MAX_LOCAL_BACKUP_FILES = 25;
+
+async function pruneBackups(): Promise<void> {
+  const files = await readdir(RUNTIME_DIR);
+  const backups = files
+    .filter((f) => f.startsWith("vector_state.json.bkp_"))
+    .sort();
+  const toDelete = backups.slice(0, Math.max(0, backups.length - MAX_LOCAL_BACKUP_FILES));
+  for (const old of toDelete) {
+    await rm(join(RUNTIME_DIR, old), { force: true });
+  }
+}
+
 const localStateStore: VectorStateStore = {
   async load() {
     await ensureDir(RUNTIME_DIR);
@@ -63,7 +76,20 @@ const localStateStore: VectorStateStore = {
       return null;
     }
     const raw = await readFile(STATE_FILE, "utf-8");
-    return JSON.parse(raw) as Record<string, unknown>;
+    try {
+      return JSON.parse(raw) as Record<string, unknown>;
+    } catch (parseError) {
+      if (parseError instanceof SyntaxError) {
+        const corruptPath = `${STATE_FILE}.corrupt_${Date.now()}`;
+        await rename(STATE_FILE, corruptPath).catch(() => {});
+        throw new Error(
+          `[VECTOR] State file is corrupt and cannot be parsed. ` +
+          `Moved to ${corruptPath} for inspection. ` +
+          `Restore from a .bkp_* file or start fresh.`
+        );
+      }
+      throw parseError;
+    }
   },
   async save(state) {
     await ensureDir(RUNTIME_DIR);
@@ -75,6 +101,7 @@ const localStateStore: VectorStateStore = {
     await ensureDir(RUNTIME_DIR);
     const backupPath = `${STATE_FILE}.bkp_${previousPhase}_to_${nextPhase}_${Date.now()}`;
     await writeFile(backupPath, JSON.stringify(state, null, 2), "utf-8");
+    await pruneBackups();
   },
   async restoreLatestBackup() {
     await ensureDir(RUNTIME_DIR);
@@ -85,10 +112,23 @@ const localStateStore: VectorStateStore = {
       return null;
     }
     const raw = await readFile(join(RUNTIME_DIR, latest), "utf-8");
-    return {
-      label: latest,
-      state: JSON.parse(raw) as Parameters<VectorStateStore["save"]>[0],
-    };
+    try {
+      return {
+        label: latest,
+        state: JSON.parse(raw) as Parameters<VectorStateStore["save"]>[0],
+      };
+    } catch (parseError) {
+      if (parseError instanceof SyntaxError) {
+        const corruptPath = `${join(RUNTIME_DIR, latest)}.corrupt_${Date.now()}`;
+        await rename(join(RUNTIME_DIR, latest), corruptPath).catch(() => {});
+        throw new Error(
+          `[VECTOR] Backup file ${latest} is corrupt and cannot be restored. ` +
+          `Moved to ${corruptPath} for inspection. ` +
+          `Try another backup file.`
+        );
+      }
+      throw parseError;
+    }
   },
 };
 const localGraphStore: VectorGraphStore = {
@@ -98,7 +138,20 @@ const localGraphStore: VectorGraphStore = {
       return null;
     }
     const raw = await readFile(GRAPH_FILE, "utf-8");
-    return JSON.parse(raw) as Record<string, unknown>;
+    try {
+      return JSON.parse(raw) as Record<string, unknown>;
+    } catch (parseError) {
+      if (parseError instanceof SyntaxError) {
+        const corruptPath = `${GRAPH_FILE}.corrupt_${Date.now()}`;
+        await rename(GRAPH_FILE, corruptPath).catch(() => {});
+        throw new Error(
+          `[VECTOR] Graph memory file is corrupt and cannot be parsed. ` +
+          `Moved to ${corruptPath} for inspection. ` +
+          `Restore from backup or start fresh.`
+        );
+      }
+      throw parseError;
+    }
   },
   async save(graph) {
     await ensureDir(RUNTIME_DIR);

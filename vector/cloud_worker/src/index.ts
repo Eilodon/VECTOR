@@ -1,6 +1,7 @@
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { createVectorRuntime, type VectorGraphStore, type VectorRuntimeInstance, type VectorStateStore, type VectorRuntimeOptions } from "../../mcp_server/core.js";
 import { authorizeRemoteRequest, enforceSessionPolicy, RemoteAuthError, type RemoteAuthContext } from "./auth.js";
+import { enforceRateLimit, getTierRateLimit } from "./ratelimit.js";
 
 const VECTOR_VERSION = "2.0.0";
 const STATE_KEY = "vector_state";
@@ -190,7 +191,41 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname === "/healthz") {
-      return new Response("ok", { status: 200 });
+      const oauthConfigured = Boolean(env.VECTOR_AUTH_ISSUER && env.VECTOR_AUTH_AUDIENCE);
+      const licenseFallback = env.VECTOR_ALLOW_LICENSE_FALLBACK !== "false";
+      return new Response(JSON.stringify({
+        status: "ok",
+        version: VECTOR_VERSION,
+        transport: "streamable-http",
+        auth: {
+          oauth_configured: oauthConfigured,
+          license_fallback: licenseFallback,
+        },
+        ts: new Date().toISOString(),
+      }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (url.pathname === "/metrics") {
+      const metrics = [
+        `# HELP vector_info VECTOR server info`,
+        `# TYPE vector_info gauge`,
+        `vector_info{version="${VECTOR_VERSION}",transport="streamable-http"} 1`,
+        ``,
+        `# HELP vector_requests_total Total MCP requests`,
+        `# TYPE vector_requests_total counter`,
+        `vector_requests_total{transport="streamable-http"} 0`,
+        ``,
+        `# HELP vector_auth_configured Whether OAuth is configured`,
+        `# TYPE vector_auth_configured gauge`,
+        `vector_auth_configured{issuer="${env.VECTOR_AUTH_ISSUER ?? 'none'}"} ${env.VECTOR_AUTH_ISSUER ? 1 : 0}`,
+      ].join("\n");
+      
+      return new Response(metrics + "\n", {
+        status: 200,
+        headers: { "content-type": "text/plain; version=0.0.4" },
+      });
     }
     if (url.pathname !== "/mcp") {
       return new Response("Not Found", { status: 404 });
@@ -218,6 +253,18 @@ export default {
         durableObjectName: ownership.durableObjectName,
         projectId: ownership.metadata.project_id,
         sessionOwner: ownership.metadata.session_owner,
+      });
+    } catch (error) {
+      if (error instanceof RemoteAuthError) {
+        return new Response(error.message, { status: error.status });
+      }
+      throw error;
+    }
+
+    // Enforce per-request rate limiting
+    try {
+      await enforceRateLimit(env, authContext, {
+        requestsPerMinute: getTierRateLimit(authContext.tier),
       });
     } catch (error) {
       if (error instanceof RemoteAuthError) {

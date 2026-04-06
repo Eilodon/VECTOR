@@ -14,8 +14,6 @@ out/
 *.js.map
 *.d.ts
 # Keep top-level .mjs scripts (scripts/*.mjs are source, not build)
-# Cần publish package này bằng git nên keep compiled dist output
-!vector/mcp_server/dist/
 
 # ── Environment & Secrets ─────────────────────────────────────
 .env

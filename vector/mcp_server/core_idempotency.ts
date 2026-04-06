@@ -27,6 +27,7 @@ export function createIdempotencyRuntime(deps: {
   maxRequestRegistryEntries: number;
   now: () => string;
   logger?: (() => Pick<Console, "warn"> | undefined) | undefined;
+  telemetry?: (() => ((event: string, meta: Record<string, unknown>) => Promise<void>) | undefined) | undefined;
   loadLatestState: () => Promise<any | null>;
   saveState: (state: any) => Promise<void>;
   syncCanonicalViews: (state: any) => any;
@@ -89,6 +90,8 @@ export function createIdempotencyRuntime(deps: {
   ) {
     return async (args: any): Promise<T> => {
       return enqueueToolExecution(async () => {
+        const startMs = Date.now();
+        
         try {
           const latestState = await deps.loadLatestState();
           if (latestState) {
@@ -107,11 +110,38 @@ export function createIdempotencyRuntime(deps: {
           }
         }
 
-        const response = await handler(stripRequestId(args));
-        if (requestId) {
-          await cacheRequestResponse(requestId, action, response);
+        try {
+          const response = await handler(stripRequestId(args));
+          const latencyMs = Date.now() - startMs;
+          
+          // Emit success telemetry
+          void deps.telemetry?.()?.("tool_invocation_completed", {
+            action,
+            phase: state.phase,
+            latency_ms: latencyMs,
+            cached: false,
+            request_id: requestId ?? null,
+          });
+          
+          if (requestId) {
+            await cacheRequestResponse(requestId, action, response);
+          }
+          return response;
+        } catch (error) {
+          const latencyMs = Date.now() - startMs;
+          
+          // Emit error telemetry
+          void deps.telemetry?.()?.("tool_invocation_failed", {
+            action,
+            phase: state.phase,
+            latency_ms: latencyMs,
+            error_code: error instanceof Error && 'code' in error ? (error as any).code : "UNKNOWN_ERROR",
+            error_message: error instanceof Error ? error.message : String(error),
+            request_id: requestId ?? null,
+          });
+          
+          throw error;
         }
-        return response;
       });
     };
   }
