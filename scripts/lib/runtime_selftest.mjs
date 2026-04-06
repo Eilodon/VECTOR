@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { webcrypto } from 'node:crypto';
 import { access, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { constants as fsConstants } from 'node:fs';
 import os from 'node:os';
@@ -11,6 +12,8 @@ import { renderHostFiles, resolveHostDefinition, writeRenderedHostFiles, repoRoo
 
 const pnpm = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
 const localServerEntry = path.join(repoRoot, 'vector/mcp_server/dist/index.js');
+
+globalThis.crypto ??= webcrypto;
 
 function summarizeToolsets(csv) {
   return csv.split(',').map((item) => item.trim()).filter(Boolean);

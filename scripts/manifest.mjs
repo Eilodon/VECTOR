@@ -8,6 +8,10 @@ const repoRoot = path.resolve(__dirname, '..');
 const manifestPath = path.join(repoRoot, 'manifest.json');
 const ignoredDirs = new Set(['.git', 'node_modules', 'dist']);
 
+function shouldIgnoreDir(name) {
+  return ignoredDirs.has(name) || name.startsWith('.tmp-');
+}
+
 async function walk(dir) {
   const entries = await readdir(dir, { withFileTypes: true });
   const files = [];
@@ -15,6 +19,7 @@ async function walk(dir) {
     if (ignoredDirs.has(entry.name)) continue;
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
+      if (shouldIgnoreDir(entry.name)) continue;
       files.push(...await walk(fullPath));
       continue;
     }

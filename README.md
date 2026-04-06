@@ -1,6 +1,6 @@
 # VECTOR Suite v2.0.0
 
-English-first. Vietnamese notes stay short and only where they add clarity.
+English is the canonical language for docs, prompts, schemas, and host assets.
 
 VECTOR is a GTM execution operating system delivered as a durable MCP server plus canonical schemas, skills, and host integration assets. It takes a project from vague market intuition to an auditable loop across intake, ICP, market, channel, thesis, venue, signal, research, and copy.
 
@@ -25,11 +25,11 @@ Use VECTOR when you need to:
 
 ## Product surfaces
 
-- Local runtime: `stdio` MCP server at [vector/mcp_server](/home/ybao/B.1/VECTOR/vector/mcp_server)
-- Remote runtime: Cloudflare `streamable-http` worker at [vector/cloud_worker](/home/ybao/B.1/VECTOR/vector/cloud_worker)
-- Canonical contracts: [vector/schemas](/home/ybao/B.1/VECTOR/vector/schemas)
-- Integration registry: [INTEGRATION_STATUS.md](/home/ybao/B.1/VECTOR/vector/docs/INTEGRATION_STATUS.md)
-- Runtime/tool contract: [runtime_contract.yaml](/home/ybao/B.1/VECTOR/vector/schemas/runtime_contract.yaml)
+- Local runtime: `stdio` MCP server at [vector/mcp_server](vector/mcp_server)
+- Remote runtime: Cloudflare `streamable-http` worker at [vector/cloud_worker](vector/cloud_worker)
+- Canonical contracts: [vector/schemas](vector/schemas)
+- Integration registry: [INTEGRATION_STATUS.md](vector/docs/INTEGRATION_STATUS.md)
+- Runtime/tool contract: [runtime_contract.yaml](vector/schemas/runtime_contract.yaml)
 
 ## Quick start
 
@@ -63,7 +63,7 @@ Local host configs are generated from maintained templates, not hand-edited JSON
 - Windsurf
 - GitHub Copilot
 
-Status truth remains in [INTEGRATION_STATUS.md](/home/ybao/B.1/VECTOR/vector/docs/INTEGRATION_STATUS.md). A generated fixture plus repo self-test does not automatically promote a host to `verified-local`; that still requires a real host run captured in the corresponding `VERIFICATION.md`.
+Status truth remains in [INTEGRATION_STATUS.md](vector/docs/INTEGRATION_STATUS.md). A generated fixture plus repo self-test does not automatically promote a host to `verified-local`; that still requires a real host run captured in the corresponding `VERIFICATION.md`.
 
 ## Remote auth model
 
@@ -100,15 +100,15 @@ pnpm run release-check
 
 ## Package map
 
-- [vector/mcp_server](/home/ybao/B.1/VECTOR/vector/mcp_server) — executable local MCP runtime
-- [vector/cloud_worker](/home/ybao/B.1/VECTOR/vector/cloud_worker) — remote MCP runtime
-- [vector/skills](/home/ybao/B.1/VECTOR/vector/skills) — phase-oriented GTM skills
-- [vector/schemas](/home/ybao/B.1/VECTOR/vector/schemas) — machine-readable contracts
-- [vector/integrations](/home/ybao/B.1/VECTOR/vector/integrations) — host fixtures, templates, and verification records
-- [vector/docs](/home/ybao/B.1/VECTOR/vector/docs) — architecture, reference workflows, and release notes
+- [vector/mcp_server](vector/mcp_server) — executable local MCP runtime
+- [vector/cloud_worker](vector/cloud_worker) — remote MCP runtime
+- [vector/skills](vector/skills) — phase-oriented GTM skills
+- [vector/schemas](vector/schemas) — machine-readable contracts
+- [vector/integrations](vector/integrations) — host fixtures, templates, and verification records
+- [vector/docs](vector/docs) — architecture, reference workflows, and release notes
 
 ## Notes
 
-If the package feels too large, start with [vector/mcp_server/README.md](/home/ybao/B.1/VECTOR/vector/mcp_server/README.md) and [INTEGRATION_SMOKE_TESTS.md](/home/ybao/B.1/VECTOR/vector/docs/INTEGRATION_SMOKE_TESTS.md).
+If the package feels too large, start with [vector/mcp_server/README.md](vector/mcp_server/README.md) and [INTEGRATION_SMOKE_TESTS.md](vector/docs/INTEGRATION_SMOKE_TESTS.md).
 
-Vietnamese note: root README là landing page của sản phẩm. Source of truth cho hành vi runtime vẫn nằm ở schema, workflow contract, và MCP server.
+Root README is the product landing page. Runtime behavior still takes its source of truth from the schemas, workflow contract, and MCP server implementation.

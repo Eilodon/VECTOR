@@ -18,8 +18,7 @@ VECTOR exists to answer five questions:
 
 ## Design principles
 
-- **English-first**. English is the source language for structure and rules.
-- **Vietnamese support notes only**. Use Vietnamese for short clarifications, not duplicated logic.
+- **English only**. Use one canonical language for rules, examples, and support notes.
 - **Machine-readable before beautiful**. A schema is preferred over prose when the two conflict.
 - **One source of truth per concept**. Avoid repeating the same rule in multiple files.
 - **Phase gates matter**. Do not skip ICP, terrain, channel scoring, thesis, or venue.
@@ -72,9 +71,7 @@ Whenever VECTOR completes a phase, it should emit:
 - the next action
 - the confidence level
 
-## Vietnamese note
-
-Dùng bộ này như một system vận hành phân phối, không phải chỉ là bộ prompt đẹp. Càng giữ schema chặt, agent càng ít bịa.
+Treat this package as an operating system for distribution, not as a bundle of attractive prompts. The tighter the schema, the less room the agent has to invent unsupported conclusions.
 
 ## v1.6 operating standard
 
@@ -123,9 +120,7 @@ If there are repeated failed attempts, VECTOR should stop adding channels and in
 - simplify the offer
 - reset the benchmark
 
-## Vietnamese note
-
-Mục tiêu của bản này là biến VECTOR thành workflow có thể cài, chạy, và audit được.
+The goal of this guide is to make VECTOR a workflow that can be installed, run, and audited.
 
 ## v1.6 applied usage flow
 

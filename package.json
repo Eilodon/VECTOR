@@ -2,7 +2,7 @@
 	"private": true,
 	"packageManager": "pnpm@10.32.1",
 	"scripts": {
-		"lint": "node scripts/manifest.mjs check",
+		"lint": "node scripts/manifest.mjs check && node scripts/repo_hygiene.mjs",
 		"integrations:check": "node scripts/verify_integrations.mjs",
 		"host:install": "node scripts/install_vector.mjs",
 		"selftest": "node scripts/selftest.mjs",

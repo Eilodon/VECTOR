@@ -453,8 +453,8 @@ After this ADR:
 
 ## References
 
-- [Architecture Spec](/home/ybao/B.1/VECTOR/vector/docs/ARCHITECTURE_SPEC.md)
-- [Decision Policy](/home/ybao/B.1/VECTOR/vector/docs/DECISION_POLICY.md)
-- [Reference Workflows](/home/ybao/B.1/VECTOR/vector/docs/REFERENCE_WORKFLOWS.md)
-- [Runtime Contract](/home/ybao/B.1/VECTOR/vector/schemas/runtime_contract.yaml)
-- [Workflow Contract](/home/ybao/B.1/VECTOR/vector/mcp_server/workflow_contract.ts)
+- [Architecture Spec](../ARCHITECTURE_SPEC.md)
+- [Decision Policy](../DECISION_POLICY.md)
+- [Reference Workflows](../REFERENCE_WORKFLOWS.md)
+- [Runtime Contract](../../schemas/runtime_contract.yaml)
+- [Workflow Contract](../../mcp_server/workflow_contract.ts)

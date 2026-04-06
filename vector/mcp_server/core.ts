@@ -356,7 +356,9 @@ function registerVectorTool(
   handler: (args: any) => Promise<ToolTextResponse>,
 ): void {
   for (const [field, schema] of Object.entries(config.inputSchema)) {
-    if (!schema || typeof schema !== "object" || !("_zod" in schema)) {
+    const isSchemaObject = Boolean(schema) && typeof schema === "object";
+    const hasZodLikeParser = isSchemaObject && ("parse" in schema || "safeParse" in schema);
+    if (!hasZodLikeParser) {
       throw new Error(`Tool '${name}' has invalid input schema for field '${field}'.`);
     }
   }

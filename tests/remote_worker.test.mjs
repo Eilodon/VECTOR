@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { webcrypto } from 'node:crypto';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -9,6 +10,8 @@ import { StreamableHTTPClientTransport } from '../vector/mcp_server/node_modules
 import { SignJWT, exportJWK, generateKeyPair } from '../vector/cloud_worker/node_modules/jose/dist/webapi/index.js';
 
 const pnpm = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
+
+globalThis.crypto ??= webcrypto;
 
 class MemoryKVNamespace {
   constructor(seed = {}) {

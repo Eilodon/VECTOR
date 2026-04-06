@@ -4,9 +4,9 @@
 
 Because a single canonical language reduces drift, duplication, and formatting inconsistency.
 
-## Why keep Vietnamese notes?
+## Why English only?
 
-To help the builder read quickly without turning the package into a bilingual copy-paste mess.
+Because one canonical language is easier to audit, verify, and maintain across docs, prompts, schemas, and host assets.
 
 ## Why schemas?
 
@@ -21,9 +21,7 @@ A portable system must respect the platform instead of forcing one format everyw
 
 Because weak signals are normal and the framework should help the builder recover fast instead of getting stuck.
 
-## Vietnamese note
-
-Mục tiêu là giúp fen dùng nó thật, không chỉ thấy nó “ngầu”.
+The goal is practical use, not aesthetic complexity.
 
 ## Is VECTOR only for prelaunch products?
 
@@ -49,5 +47,4 @@ Use the benchmark and drift checks. A noisy channel can still be useful if the r
 
 Use Quick Start first. The system is designed so the user can operate with a minimum entry path and only expand when needed.
 
-## Vietnamese note
-Càng rõ state thì càng ít phải đoán. VECTOR được thiết kế để giảm đoán mò, không phải tăng số thứ phải nhớ.
+The clearer the state is, the less guessing the system requires. VECTOR is designed to reduce ambiguity, not to increase the number of things users have to remember.

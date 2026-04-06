@@ -3,10 +3,10 @@
 This checklist converts ADR 0001 workstreams 5 and 6 into concrete implementation tasks against the current repo state as of 2026-03-26.
 
 References:
-- [ADR 0001](/home/ybao/B.1/VECTOR/vector/docs/adr/0001-vector-next-architecture.md)
-- [Integration Status](/home/ybao/B.1/VECTOR/vector/docs/INTEGRATION_STATUS.md)
-- [Integration Smoke Tests](/home/ybao/B.1/VECTOR/vector/docs/INTEGRATION_SMOKE_TESTS.md)
-- [Runtime Contract](/home/ybao/B.1/VECTOR/vector/schemas/runtime_contract.yaml)
+- [ADR 0001](adr/0001-vector-next-architecture.md)
+- [Integration Status](INTEGRATION_STATUS.md)
+- [Integration Smoke Tests](INTEGRATION_SMOKE_TESTS.md)
+- [Runtime Contract](../schemas/runtime_contract.yaml)
 
 ## WS5: Productized Install
 
