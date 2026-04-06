@@ -1,3 +1,5 @@
+import { VectorError } from "./core_error_codes.js";
+
 export function registerWorkflowTools(deps: {
   registerVectorTool: (name: string, config: { description: string; inputSchema: Record<string, any> }, handler: (args: any) => Promise<any>) => void;
   ensureToolPhase: (toolName: string) => void;
@@ -647,7 +649,11 @@ export function registerWorkflowTools(deps: {
             if (phaseMatch && phaseMatch[1]) {
               const kbPhase = phaseMatch[1].trim().toLowerCase();
               if (kbPhase !== state().phase) {
-                throw new Error(`State Drift Detected [ADR-002]: KNOWLEDGE_BASE.md indicates phase '${kbPhase}', but MCP Server is in phase '${state().phase}'. Please use the appropriate vector_* tools to advance the state, instead of modifying the Markdown file manually.`);
+                throw new VectorError(
+                  "STATE_DRIFT_DETECTED",
+                  `State Drift Detected [ADR-002]: KNOWLEDGE_BASE.md indicates phase '${kbPhase}', but MCP Server is in phase '${state().phase}'. Please use the appropriate vector_* tools to advance the state, instead of modifying the Markdown file manually.`,
+                  { kbPhase, mcpPhase: state().phase }
+                );
               }
             }
           }
@@ -777,7 +783,11 @@ export function registerWorkflowTools(deps: {
     async (args: any) => {
       deps.ensureToolPhase("vector_venue");
       if (!state().thesis_card) {
-        throw new Error("Venue gate requires an existing thesis card. Run vector_thesis first.");
+        throw new VectorError(
+          "COPY_PREREQUISITES_FAILED",
+          "Venue gate requires an existing thesis card. Run vector_thesis first.",
+          { missing: "thesis_card" }
+        );
       }
       const cleaned = deps.sanitizeRecursive(args) as any;
       const venue_card = {

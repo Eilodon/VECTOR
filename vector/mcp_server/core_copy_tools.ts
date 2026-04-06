@@ -1,3 +1,5 @@
+import { VectorError } from "./core_error_codes.js";
+
 export function registerCopyTools(deps: {
   registerVectorTool: (name: string, config: { description: string; inputSchema: Record<string, any> }, handler: (args: any) => Promise<any>) => void;
   ensureToolPhase: (toolName: string) => void;
@@ -32,10 +34,18 @@ export function registerCopyTools(deps: {
     async ({ desired_conversion_step, angle, headline, subheadline, body, cta, objections, followup_ladder }: any) => {
       deps.ensureToolPhase("vector_sales_copy");
       if (!state().thesis_card || !state().venue_card) {
-        throw new Error("Sales copy requires both thesis_card and venue_card. Lock the venue gate first.");
+        throw new VectorError(
+          "COPY_PREREQUISITES_FAILED",
+          "Sales copy requires both thesis_card and venue_card. Lock the venue gate first.",
+          { missing: ["thesis_card", "venue_card"].filter(k => !state()[k]) }
+        );
       }
       if (!state().icp.forces.anxiety?.trim() || !state().icp.forces.habit?.trim()) {
-        throw new Error("Sales copy requires ICP 4 Forces, especially anxiety and habit, before running objection protocol.");
+        throw new VectorError(
+          "COPY_PREREQUISITES_FAILED",
+          "Sales copy requires ICP 4 Forces, especially anxiety and habit, before running objection protocol.",
+          { missingForces: ["anxiety", "habit"].filter(f => !state().icp.forces[f]?.trim()) }
+        );
       }
       const cleaned = deps.sanitizeRecursive({ desired_conversion_step, angle, headline, subheadline, body, cta, objections, followup_ladder }) as any;
       const { sales_copy, objection_map } = deps.buildSalesCopyPack(state(), cleaned);
@@ -78,7 +88,11 @@ export function registerCopyTools(deps: {
     async () => {
       deps.ensureToolPhase("vector_copy_review");
       if (!state().sales_copy) {
-        throw new Error("Copy review requires an existing sales_copy artifact. Run vector_sales_copy first.");
+        throw new VectorError(
+          "COPY_PREREQUISITES_FAILED",
+          "Copy review requires an existing sales_copy artifact. Run vector_sales_copy first.",
+          { missing: "sales_copy" }
+        );
       }
       const copy_review = deps.reviewSalesCopyPack(state(), deps.now());
       const nextState = {

@@ -1,3 +1,5 @@
+import { VectorError } from "./core_error_codes.js";
+
 export function registerResearchTools(deps: {
   registerVectorTool: (name: string, config: { description: string; inputSchema: Record<string, any> }, handler: (args: any) => Promise<any>) => void;
   ensureToolPhase: (toolName: string) => void;
@@ -293,7 +295,11 @@ export function registerResearchTools(deps: {
       const existing = existingMemo ?? deps.defaultResearchMemo("Channel evidence");
       const missingEvidence = cleaned.evidence_ids.filter((id: string) => !existing.evidence_table.some((item: any) => item.id === id));
       if (missingEvidence.length) {
-        throw new Error(`Channel evidence references missing evidence ids: ${missingEvidence.join(", ")}`);
+        throw new VectorError(
+          "RESEARCH_PROVIDER_ERROR",
+          `Channel evidence references missing evidence ids: ${missingEvidence.join(", ")}`,
+          { missingEvidenceIds: missingEvidence }
+        );
       }
       const observation = deps.researchChannelObservationSchema.parse({
         ...cleaned,

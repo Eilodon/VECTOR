@@ -4,6 +4,7 @@ import { constants as fsConstants } from "node:fs";
 import { join } from "node:path";
 import * as os from "node:os";
 import { createVectorRuntime, type VectorGraphStore, type VectorStateStore } from "./core.js";
+import { VectorError } from "./core_error_codes.js";
 
 const licenseKey = process.env.VECTOR_LICENSE_KEY;
 if (!licenseKey || !licenseKey.startsWith("vsk_")) {
@@ -82,10 +83,12 @@ const localStateStore: VectorStateStore = {
       if (parseError instanceof SyntaxError) {
         const corruptPath = `${STATE_FILE}.corrupt_${Date.now()}`;
         await rename(STATE_FILE, corruptPath).catch(() => {});
-        throw new Error(
+        throw new VectorError(
+          "STATE_FILE_CORRUPT",
           `[VECTOR] State file is corrupt and cannot be parsed. ` +
           `Moved to ${corruptPath} for inspection. ` +
-          `Restore from a .bkp_* file or start fresh.`
+          `Restore from a .bkp_* file or start fresh.`,
+          { corruptPath }
         );
       }
       throw parseError;
@@ -121,10 +124,12 @@ const localStateStore: VectorStateStore = {
       if (parseError instanceof SyntaxError) {
         const corruptPath = `${join(RUNTIME_DIR, latest)}.corrupt_${Date.now()}`;
         await rename(join(RUNTIME_DIR, latest), corruptPath).catch(() => {});
-        throw new Error(
+        throw new VectorError(
+          "BACKUP_FILE_CORRUPT",
           `[VECTOR] Backup file ${latest} is corrupt and cannot be restored. ` +
           `Moved to ${corruptPath} for inspection. ` +
-          `Try another backup file.`
+          `Try another backup file.`,
+          { backupFile: latest, corruptPath }
         );
       }
       throw parseError;
@@ -144,10 +149,12 @@ const localGraphStore: VectorGraphStore = {
       if (parseError instanceof SyntaxError) {
         const corruptPath = `${GRAPH_FILE}.corrupt_${Date.now()}`;
         await rename(GRAPH_FILE, corruptPath).catch(() => {});
-        throw new Error(
+        throw new VectorError(
+          "GRAPH_FILE_CORRUPT",
           `[VECTOR] Graph memory file is corrupt and cannot be parsed. ` +
           `Moved to ${corruptPath} for inspection. ` +
-          `Restore from backup or start fresh.`
+          `Restore from backup or start fresh.`,
+          { corruptPath }
         );
       }
       throw parseError;

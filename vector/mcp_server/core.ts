@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
+import { VectorError } from "./core_error_codes.js";
 import { createArtifactEmitter, artifactToText } from "./core_artifact_emit.js";
 import { registerAdminTools } from "./core_admin_tools.js";
 import { registerCopyTools } from "./core_copy_tools.js";
@@ -212,6 +213,7 @@ const {
   defaultSession,
   defaultState,
 } = stateDefaults;
+
 let VECTOR_STATE: VectorState = defaultState();
 let GRAPH_MEMORY: VectorGraphMemory = { version: CURRENT_VERSION, updated_at: new Date(0).toISOString(), nodes: [], edges: [], sync_history: [] };
 const workflowHelpers = createWorkflowHelpers({
@@ -222,7 +224,11 @@ const workflowHelpers = createWorkflowHelpers({
   phaseToMilestone: PHASE_TO_MILESTONE,
   getSyncCanonicalViews: () => {
     if (!syncCanonicalViewsRef) {
-      throw new Error("syncCanonicalViews is not initialized yet.");
+      throw new VectorError(
+        "UNKNOWN_ERROR",
+        "syncCanonicalViews is not initialized yet.",
+        { hint: "Call createVectorRuntime first" }
+      );
     }
     return syncCanonicalViewsRef;
   },
@@ -359,7 +365,11 @@ function registerVectorTool(
     const isSchemaObject = Boolean(schema) && typeof schema === "object";
     const hasZodLikeParser = isSchemaObject && ("parse" in schema || "safeParse" in schema);
     if (!hasZodLikeParser) {
-      throw new Error(`Tool '${name}' has invalid input schema for field '${field}'.`);
+      throw new VectorError(
+        "UNKNOWN_ERROR",
+        `Tool '${name}' has invalid input schema for field '${field}'.`,
+        { tool: name, field }
+      );
     }
   }
   TOOL_DEFINITIONS.push({ name, config, handler });

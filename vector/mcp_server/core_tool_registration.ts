@@ -1,4 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { VectorError } from "./core_error_codes.js";
 
 export function createToolRegistrar(deps: {
   currentVersion: () => string;
@@ -29,7 +30,11 @@ export function createToolRegistrar(deps: {
     for (const definition of deps.getToolDefinitions()) {
       const policy = deps.capabilityPolicy(definition.name);
       if (!policy) {
-        throw new Error(`Capability policy is missing for '${definition.name}'.`);
+        throw new VectorError(
+          "CAPABILITY_POLICY_MISSING",
+          `Capability policy is missing for '${definition.name}'.`,
+          { tool: definition.name }
+        );
       }
       if (!enabledToolsets.has(policy.toolset)) {
         continue;
@@ -53,7 +58,11 @@ export function createToolRegistrar(deps: {
         },
         deps.withIdempotency(definition.name, async (args: any) => {
           if (capabilityState.safeMode && policy.safe_mode_blocked) {
-            throw new Error(`safe_mode blocks '${definition.name}' because it mutates admin state.`);
+            throw new VectorError(
+              "SAFE_MODE_BLOCKED",
+              `safe_mode blocks '${definition.name}' because it mutates admin state.`,
+              { tool: definition.name }
+            );
           }
           return definition.handler(args);
         }),

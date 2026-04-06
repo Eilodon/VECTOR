@@ -7,6 +7,7 @@ import {
   type SearchProviderDescriptor,
   type SearchProviderRequest,
 } from "./research_provider_contract.js";
+import { VectorError } from "./core_error_codes.js";
 import { buildHeuristicSearchPayload } from "./research_runtime.js";
 
 const FIXTURE_PROVIDER_ID = "fixture_search";
@@ -152,7 +153,11 @@ function scoreDocumentAgainstQuery(document: (typeof FIXTURE_DOCUMENTS)[number],
 function requireEnv(name: string): string {
   const value = process.env[name]?.trim();
   if (!value) {
-    throw new Error(`Research provider requires env var '${name}'.`);
+    throw new VectorError(
+      "RESEARCH_PROVIDER_NOT_CONFIGURED",
+      `Research provider requires env var '${name}'.`,
+      { envVar: name }
+    );
   }
   return value;
 }
@@ -190,12 +195,20 @@ async function fetchJson(url: string, init: RequestInit, providerLabel: string):
   try {
     const response = await fetch(url, { ...init, signal: controller.signal });
     if (!response.ok) {
-      throw new Error(`${providerLabel} search failed (${response.status}).`);
+      throw new VectorError(
+        "RESEARCH_PROVIDER_ERROR",
+        `${providerLabel} search failed (${response.status}).`,
+        { provider: providerLabel, status: response.status }
+      );
     }
     return response.json();
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
-      throw new Error(`${providerLabel} search timed out after ${PROVIDER_TIMEOUT_MS}ms.`);
+      throw new VectorError(
+        "RESEARCH_PROVIDER_TIMEOUT",
+        `${providerLabel} search timed out after ${PROVIDER_TIMEOUT_MS}ms.`,
+        { provider: providerLabel, timeoutMs: PROVIDER_TIMEOUT_MS }
+      );
     }
     throw error;
   } finally {
@@ -364,11 +377,19 @@ export function listSearchProviders(): SearchProviderDescriptor[] {
 export function getSearchProvider(providerId: string): SearchProvider {
   const provider = registry.search[providerId];
   if (!provider) {
-    throw new Error(`Unknown search provider '${providerId}'.`);
+    throw new VectorError(
+      "RESEARCH_PROVIDER_NOT_CONFIGURED",
+      `Unknown search provider '${providerId}'.`,
+      { providerId }
+    );
   }
   if (!provider.isConfigured()) {
     const requirements = provider.required_env.length ? ` Missing env: ${provider.required_env.join(", ")}.` : "";
-    throw new Error(`Search provider '${providerId}' is not configured.${requirements}`);
+    throw new VectorError(
+      "RESEARCH_PROVIDER_NOT_CONFIGURED",
+      `Search provider '${providerId}' is not configured.${requirements}`,
+      { providerId, requiredEnv: provider.required_env }
+    );
   }
   return provider;
 }

@@ -1,3 +1,5 @@
+import { VectorError } from "./core_error_codes.js";
+
 export function createWorkflowHelpers(deps: {
   now: () => string;
   getState: () => any;
@@ -14,8 +16,10 @@ export function createWorkflowHelpers(deps: {
     if (!nextPhase || nextPhase === currentPhase) return;
     const allowed = deps.phasePolicy(currentPhase).allowed_next;
     if (!allowed.includes(nextPhase)) {
-      throw new Error(
+      throw new VectorError(
+        "PHASE_TRANSITION_ILLEGAL",
         `Illegal phase transition: ${currentPhase} -> ${nextPhase}. Allowed next phases: ${allowed.join(", ") || "none"}.`,
+        { currentPhase, nextPhase, allowedNext: allowed }
       );
     }
   }
@@ -187,7 +191,11 @@ export function createWorkflowHelpers(deps: {
   function assertPhasePrerequisites(targetPhase: string, candidateState: any): void {
     const failures = phasePrerequisites(targetPhase, candidateState);
     if (failures.length) {
-      throw new Error(`Phase prerequisites failed for '${targetPhase}': ${failures.join("; ")}`);
+      throw new VectorError(
+        "PHASE_PREREQUISITES_FAILED",
+        `Phase prerequisites failed for '${targetPhase}': ${failures.join("; ")}`,
+        { targetPhase, failures }
+      );
     }
   }
 
