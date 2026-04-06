@@ -1,3 +1,5 @@
+import { VectorError } from "./core_error_codes.js";
+
 export const CAPABILITY_TOOLSETS = {
   core: [
     "vector_intake",
@@ -112,7 +114,11 @@ export function resolveToolsets(requested?: string[] | null): CapabilityToolset[
     .map((item) => item as CapabilityToolset);
   const invalid = normalized.filter((item) => !TOOLSET_NAMES.includes(item));
   if (invalid.length) {
-    throw new Error(`Unknown capability toolsets: ${invalid.join(", ")}.`);
+    throw new VectorError(
+      "CAPABILITY_POLICY_MISSING",
+      `Unknown capability toolsets: ${invalid.join(", ")}.`,
+      { invalidToolsets: invalid }
+    );
   }
   return [...new Set(normalized)];
 }

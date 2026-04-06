@@ -219,7 +219,7 @@ export default {
         ``,
         `# HELP vector_auth_configured Whether OAuth is configured`,
         `# TYPE vector_auth_configured gauge`,
-        `vector_auth_configured{issuer="${env.VECTOR_AUTH_ISSUER ?? 'none'}"} ${env.VECTOR_AUTH_ISSUER ? 1 : 0}`,
+        `vector_auth_configured{issuer="${env.VECTOR_AUTH_ISSUER ? 'configured' : 'none'}"} ${env.VECTOR_AUTH_ISSUER ? 1 : 0}`,
       ].join("\n");
       
       return new Response(metrics + "\n", {

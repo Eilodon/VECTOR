@@ -1,3 +1,5 @@
+import { VectorError } from "./core_error_codes.js";
+
 export type CopyStateLike = {
   thesis_card?: {
     primary_channel?: string | null;
@@ -156,7 +158,11 @@ export function buildSalesCopyPack(state: CopyStateLike, input: SalesCopyInput) 
 export function reviewSalesCopyPack(state: CopyStateLike, reviewedAt: string): CopyReview {
   const salesCopy = state.sales_copy;
   if (!salesCopy) {
-    throw new Error("Copy review requires an existing sales_copy artifact. Run vector_sales_copy first.");
+    throw new VectorError(
+      "COPY_PREREQUISITES_FAILED",
+      "Copy review requires an existing sales_copy artifact. Run vector_sales_copy first.",
+      { missing: "sales_copy" }
+    );
   }
   const haystack = [
     salesCopy.headline,

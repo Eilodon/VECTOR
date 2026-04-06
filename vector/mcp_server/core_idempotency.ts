@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { VectorError, toolError, toVectorError } from "./core_error_codes.js";
 
 export function withRequestSchema<T extends Record<string, z.ZodTypeAny>>(shape: T): T & { request_id: z.ZodOptional<z.ZodString> } {
   return {
@@ -129,18 +130,20 @@ export function createIdempotencyRuntime(deps: {
           return response;
         } catch (error) {
           const latencyMs = Date.now() - startMs;
+          const vectorError = toVectorError(error);
           
           // Emit error telemetry
           void deps.telemetry?.()?.("tool_invocation_failed", {
             action,
             phase: state.phase,
             latency_ms: latencyMs,
-            error_code: error instanceof Error && 'code' in error ? (error as any).code : "UNKNOWN_ERROR",
-            error_message: error instanceof Error ? error.message : String(error),
+            error_code: vectorError.code,
+            error_message: vectorError.message,
             request_id: requestId ?? null,
           });
           
-          throw error;
+          // Return MCP-compliant error response instead of throwing
+          return toolError(vectorError.code, vectorError.message, vectorError.context) as unknown as T;
         }
       });
     };
